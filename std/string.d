@@ -750,14 +750,14 @@ S toLower(S)(S s) @trusted pure
     foreach (i, dchar cOuter; s)
     {
         if (!std.uni.isUpper(cOuter)) continue;
-        auto result = s[0.. i].dup;
-        foreach (dchar c; s[i .. $])
+        
+        auto result = s.dup;
+        foreach (j, dchar c; s[i .. $])
         {
-            if (std.uni.isUpper(c))
+            if (std.uni.isUpper(c))   //Is it faster to not do the check?
             {
-                c = std.uni.toLower(c);
+                result[i+j] = std.uni.toLower(c);
             }
-            result ~= c;
         }
         return cast(S) result;
     }
@@ -793,9 +793,8 @@ unittest
 void toLowerInPlace(C)(ref C[] s)
     if(is(C == char) || is(C == wchar))
 {
-    for (size_t i = 0; i < s.length; )
+    foreach (i, c; s)
     {
-        immutable c = s[i];
         if (std.ascii.isUpper(c))
         {
             s[i++] = cast(C) (c + (cast(C)'a' - 'A'));
@@ -812,7 +811,7 @@ void toLowerInPlace(C)(ref C[] s)
                 continue;
             }
             auto toAdd = to!(C[])(std.uni.toLower(dc));
-            s = s[0 .. i] ~ toAdd  ~ s[j .. $];
+            s[i .. j] = toAdd[];
             i += toAdd.length;
         }
         else
@@ -899,17 +898,18 @@ unittest
 S toUpper(S)(S s) @trusted pure
     if(isSomeString!S)
 {
+
     foreach (i, dchar cOuter; s)
     {
-        if (!std.uni.isLower(cOuter)) continue;
-        auto result = s[0.. i].dup;
-        foreach (dchar c; s[i .. $])
+        if (!std.uni.isUpper(cOuter)) continue;
+        
+        auto result = s.dup;
+        foreach (j, dchar c; s[i .. $])
         {
-            if (std.uni.isLower(c))
+            if (std.uni.isLower(c))   //Is it faster to not do the check?
             {
-                c = std.uni.toUpper(c);
+                result[i+j] = std.uni.toUpper(c);
             }
-            result ~= c;
         }
         return cast(S) result;
     }
@@ -942,13 +942,12 @@ unittest
     Converts $(D s) to uppercase (in unicode, not just ASCII) in place.
     If $(D s) does not have any lowercase characters, then $(D s) is unaltered.
  +/
-void toUpperInPlace(C)(ref C[] s)
+void toUpperInPlace(C)(C[] s)
     if(isSomeChar!C &&
        (is(C == char) || is(C == wchar)))
 {
-    for (size_t i = 0; i < s.length; )
+    foreach(i, c; s)
     {
-        immutable c = s[i];
         if ('a' <= c && c <= 'z')
         {
             s[i++] = cast(C) (c - (cast(C)'a' - 'A'));
@@ -965,7 +964,7 @@ void toUpperInPlace(C)(ref C[] s)
                 continue;
             }
             auto toAdd = to!(C[])(std.uni.toUpper(dc));
-            s = s[0 .. i] ~ toAdd  ~ s[j .. $];
+            s[i .. j] = toAdd[];
             i += toAdd.length;
         }
         else
@@ -975,7 +974,7 @@ void toUpperInPlace(C)(ref C[] s)
     }
 }
 
-void toUpperInPlace(C)(ref C[] s) @safe pure nothrow
+void toUpperInPlace(C)(C[] s) @safe pure nothrow
     if(is(C == dchar))
 {
     foreach(ref c; s)
@@ -1032,7 +1031,7 @@ unittest
 
 
 /++
-    Capitalize the first character of $(D s) and conver the rest of $(D s)
+    Capitalize the first character of $(D s) and convert the rest of $(D s)
     to lowercase.
  +/
 S capitalize(S)(S s) @trusted pure
@@ -1069,6 +1068,17 @@ S capitalize(S)(S s) @trusted pure
     }
 
     return changed ? cast(S)retval : s;
+}
+
+S capitalize(S)(S s) @trusted pure
+    if(isSomeString!S)
+{
+    if(s.length == 0)
+    {
+        return s;
+    }
+    s[0] = std.uni.toUpper(s[0]);
+    s[1 .. $].toLower();
 }
 
 unittest

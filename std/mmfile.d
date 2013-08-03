@@ -48,7 +48,7 @@ else
 /**
  * MmFile objects control the memory mapped file resource.
  */
-class MmFile
+struct MmFile
 {
     /**
      * The mode the memory mapped file is opened with.

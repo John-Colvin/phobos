@@ -4829,17 +4829,23 @@ void doFormat(void delegate(dchar) putc, TypeInfo[] arguments, va_list argptr)
                     version (Win64)
                     {
                         if(isnan(v)) // snprintf writes 1.#QNAN
-                            n = snprintf(fbuf.ptr, sl, "nan");
+                        {
+                            n = 3;
+                            fbuf[0..3] = "nan"[];
+                        }
                         else
+                        {
                             n = snprintf(fbuf.ptr, sl, format.ptr, field_width,
                                 precision, cast(double)v);
+                        }
                     }
                     else
                         n = snprintf(fbuf.ptr, sl, format.ptr, field_width,
                                 precision, v);
                     //printf("format = '%s', n = %d\n", cast(char*)format, n);
                     if (n >= 0 && n < sl)
-                    {        sl = n;
+                    {        
+                        sl = n;
                         break;
                     }
                     if (n < 0)

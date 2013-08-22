@@ -3990,21 +3990,19 @@ unittest
 }
 
 /**
-Library typedef.
+Library typedef. Provides a typesafe wrapper around
+a type.
  */
-template Typedef(T)
-{
-    alias .Typedef!(T, T.init) Typedef;
-}
 
-/// ditto
-struct Typedef(T, T init, string cookie=null)
+struct Typedef(T, T init = T.init, string cookie=null)
 {
-    private T Typedef_payload = init;
-
-    this(T init)
+    static if(init != T.init)
     {
-        Typedef_payload = init;
+        private T Typedef_payload = init;
+    }
+    else
+    {
+        private T Typedef_payload;
     }
 
     mixin Proxy!Typedef_payload;

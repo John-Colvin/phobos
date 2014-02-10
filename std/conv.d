@@ -21,7 +21,7 @@ WIKI = Phobos/StdConv
 */
 module std.conv;
 
-import core.stdc.string;
+import core.stdc.string, core.stdc.wchar_;
 import std.algorithm, std.array, std.ascii, std.exception, std.range,
     std.string, std.traits, std.typecons, std.typetuple, std.uni,
     std.utf;
@@ -837,6 +837,11 @@ T toImpl(T, S)(S value)
     {
         // It is unsafe because we cannot guarantee that the pointer is null terminated.
         return value ? cast(T) value[0 .. strlen(value)].dup : cast(string)null;
+    }
+    else static if (isPointer!S && is(S : const(wchar)*))
+    {
+        // Ditto
+        return value ? cast(T) value[0 .. wcslen(value)].dup : cast(string)null;
     }
     else static if (isSomeString!T && is(S == enum))
     {

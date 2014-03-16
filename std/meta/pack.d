@@ -1,3 +1,15 @@
+// Written in the D programming language.
+
+/**
+   This module contains the definition of the $(D Pack) type, an encapsulated collection of template parameter arguments.
+
+   Author: John L Colvin
+
+   License: $(WEB www.boost.org/LICENSE_1_0.txt, Boost License 1.0)
+
+   Source: $(PHOBOSSRC std/meta/_pack.d)
+ */
+
 module std.meta.pack;
 
 import std.meta.algorithm;
@@ -7,19 +19,15 @@ import std.traits;
 
 
 /**
- * A mixin template to inject the definition of Pack in to a scope. Using this
+ * A mixin template to inject the definition of $(D Pack) in to a scope. Using this
  * will locally expand dot notation instantiation for Packs to symbols in said
  * scope.
  */
 mixin template PackDef()
 {
-/**
- * Confines a Seq within a struct. The result is simply a type: Access to the
- * underlying Seq is done using $(D Unpack).
- */
 struct Pack(T...)
 {
-    alias This = typeof(this);
+    private alias This = typeof(this);
 
     alias Unpack = T;
 
@@ -30,9 +38,9 @@ struct Pack(T...)
     //doesn't really work properly with indexing.
     //often the indexing never actually happens, unittests break
     //and pragma msgs show Pack!(blah)[0]
-    alias Unpack this;
+    // alias Unpack this;
 
-    /**
+    /*
      * UFCS for Packs.
      * takes care of all first argument functions
      * only works with templates visible in the scope of the definition
@@ -58,9 +66,35 @@ struct Pack(T...)
 //adds Pack to the current scope
 mixin PackDef!();
 
-/**
- * asArg moves it's 
- */
+unittest
+{
+    alias W = Pack!(5,3,4);
+    static assert(W.Index!(2) == 4);
+}
+
+version(StdDdoc)
+{
+    /**
+     * Confines a Seq within a struct. The result is simply a type: Access to the
+     * underlying Seq is done using $(D Unpack).
+     */
+    struct Pack(T ...)
+    {
+        /// The unpacked version of the $(D Pack). See $(XREF meta_seq, Seq)
+        alias Unpack = T;
+
+        /// The length of the $(D Pack).
+        enum length = T.length; //lowercase for familiarity
+    }
+}
+
+
+/++
+ + asArg returns a type that positions $(D T) in argument position $(D argIndex)
+ + in any template $(D Templ) given as $(D asArg!(/*...*/).Templ!(/*...*/)) e.g.
+ + $(D asArg!(1, Pack!(1, Pack!2, 3)).Map!isPack
+ + //evaluates to Pack!(False, True, False))
+ +/
 struct asArg(size_t argIndex, T ...)
     if(T.length == 1)
 {
@@ -80,6 +114,8 @@ enum Length(P) = P.length;
 
 /**
  * Check is the passed set of parameters is an instantiation of $(D Pack).
+ *
+ * Note:
  * This is a deliberatly permissive template: You can pass it absolutely
  * anything (that is itself valid) without error, it will simply return false
  * unless there is a single $(D Pack) argument only.
@@ -164,7 +200,8 @@ unittest
     static assert(hasLength!(2, Pack!(0,1)));
 }
 
-alias hasLength(size_t len) = PartialApply!(.hasLength, 0, len);
+// package for now
+package alias hasLength(size_t len) = PartialApply!(.hasLength, 0, len);
 ///
 unittest
 {
@@ -183,24 +220,30 @@ template Slice(P, size_t i0, size_t i1)
     alias Slice = Pack!(P.Unpack[i0 .. i1]);
 }
 
-alias Slice(P, size_t i0) = .Slice!(P, i0, P.length);
+//package for now
+package alias Slice(P, size_t i0) = .Slice!(P, i0, P.length);
 
-alias Slice(size_t i0, size_t i1) = PartialApply!(.Slice, 1, i0, i1);
+package alias Slice(size_t i0, size_t i1) = PartialApply!(.Slice, 1, i0, i1);
 
-alias Slice(size_t i0) = PartialApply!(.Slice, 1, i0);
+package alias Slice(size_t i0) = PartialApply!(.Slice, 1, i0);
 
-
+/**
+ * Evaluates to the $(D i)th element of $(D P) where $(D P) is a $(D Pack)
+ */
 template Index(P, size_t i)
     if(isPack!P)
 {
     alias Index = Alias!(P.Unpack[i]);
 }
 
-alias Index(size_t i) = PartialApply!(.Index, 1, i);
+// package for now
+package alias Index(size_t i) = PartialApply!(.Index, 1, i);
 
-alias Index(P) = PartialApply!(.Index, 0, P);
+package alias Index(P) = PartialApply!(.Index, 0, P);
 
-
+/**
+ * Concatenates 2 $(D Pack)s to form a new $(D Pack) of equal or greater length
+ */
 template Chain(T ...)
     if(All!(isPack, Pack!T))
 {
@@ -222,7 +265,9 @@ unittest
     assert(c == 3);
 }
 
-
+/**
+ * Get the first element of a $(D Pack)
+ */
 template Front(T)
     if(isPack!T)
 {
@@ -313,26 +358,28 @@ unittest
     static assert(is(TL == Pack!(float, int, long, long, int)));
 }
 
-
-template Stride(TList, size_t n)
-    if(isPack!TList)
+/**
+ * Evaluates to a new $(D Pack) containing each $(D n)th member of $(D P)
+ */
+template Stride(P, size_t n)
+    if(isPack!P)
 {
     static assert(n != 0, "n cannot be 0");
     static if(n == 1)
     {
-	alias Stride = TList;
+	alias Stride = P;
     }
-    else static if(n >= TList.length)
+    else static if(n >= P.length)
     {
-	alias Stride = Pack!(Front!TList);
+	alias Stride = Pack!(Front!P);
     }
     else
     {
-	alias Stride = Pack!(Front!TList,
-			     Stride!(Slice!(TList, n, TList.length), n).Unpack);
+	alias Stride = Pack!(Front!P,
+			     Stride!(Slice!(P, n, P.length), n).Unpack);
     }
 }
-
+///
 unittest
 {
     static assert(is(Stride!(Pack!(1,2,3,4), 2) == Pack!(1,3)));
@@ -340,7 +387,12 @@ unittest
 		     == Pack!(int, 3)));
 }
 
-
+/**
+ * Given a template argument list of $(D Pack)s, $(D RoundRobin) evalues to the 
+ * first elements of each $(D Pack), followed by the second elements and so on. 
+ * If the $(D Packs) are of unequal length, the missing elements are simply 
+ * omitted. See $(XREF range, roundRobin)
+ */
 template RoundRobin(Packs ...)
     if(SeqAll!(isPack, Packs))
 {
@@ -362,7 +414,7 @@ template RoundRobin(Packs ...)
 	alias RoundRobin = Concat!(init, RoundRobin!remainingTruncated);
     }
 }
-
+///
 unittest
 {
     alias a = Pack!(1, 2, 3);
@@ -372,7 +424,10 @@ unittest
 }
 
 
-
+/**
+ * Starting from $(D index), Radial evaluates to a $(D Pack) of alternate left
+ * and right members of $(D P)
+ */
 template Radial(P, size_t index = P.length / 2)
     if(isPack!P)
 {
@@ -380,21 +435,27 @@ template Radial(P, size_t index = P.length / 2)
 			       Slice!(P, index+1, P.length));
 }
 
-
+/**
+ * Evaluates to a $(D Pack) of the first $(D n) elements of $(D P)
+ */
 template Take(P, size_t n)
     if(isPack!P)
 {
     alias Take = Slice!(P, 0, n);
 }
 
-
+/**
+ * Evaluates to a $(D Pack) of the last $(D P.length - n) elements of $(D P)
+ */
 template Drop(P, size_t n)
     if(isPack!P)
 {
     alias Drop = Slice!(P, n, P.length);
 }
 
-
+/**
+ * Evaluates to a $(D Pack) of the first $(D P.length - n) elements of $(D P)
+ */
 template DropBack(P, size_t n)
     if(isPack!P)
 {
@@ -404,6 +465,7 @@ template DropBack(P, size_t n)
 
 /**
  * Repeats A n times.
+ *
  * If only a size is passed, Repeat results in a template that is pre-set to 
  * repeat it's arguments n times
  */

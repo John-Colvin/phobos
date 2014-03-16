@@ -87,7 +87,7 @@ DOCSRC = ../dlang.org
 WEBSITE_DIR = ../web
 DOC_OUTPUT_DIR = $(WEBSITE_DIR)/phobos-prerelease
 BIGDOC_OUTPUT_DIR = /tmp
-SRC_DOCUMENTABLES = index.d $(addsuffix .d,$(STD_MODULES) $(STD_NET_MODULES) $(STD_DIGEST_MODULES) $(EXTRA_DOCUMENTABLES))
+SRC_DOCUMENTABLES = index.d $(addsuffix .d,$(STD_MODULES) $(STD_NET_MODULES) $(STD_DIGEST_MODULES) $(STD_META_MODULES) $(EXTRA_DOCUMENTABLES))
 STDDOC = $(DOCSRC)/std.ddoc
 BIGSTDDOC = $(DOCSRC)/std_consolidated.ddoc
 # Set DDOC, the documentation generator
@@ -188,6 +188,8 @@ STD_NET_MODULES = $(addprefix std/net/, isemail curl)
 
 STD_DIGEST_MODULES = $(addprefix std/digest/, digest crc md ripemd sha)
 
+STD_META_MODULES = $(addprefix std/meta/, algorithm functional package pack seq)
+
 # OS-specific D modules
 EXTRA_MODULES_LINUX := $(addprefix std/c/linux/, linux socket)
 EXTRA_MODULES_OSX := $(addprefix std/c/osx/, socket)
@@ -213,7 +215,7 @@ EXTRA_MODULES += $(EXTRA_DOCUMENTABLES) $(addprefix			\
 
 # Aggregate all D modules relevant to this build
 D_MODULES = $(STD_MODULES) $(EXTRA_MODULES) $(STD_NET_MODULES) \
-    $(STD_DIGEST_MODULES)
+    $(STD_DIGEST_MODULES) $(STD_META_MODULES)
 # Add the .d suffix to the module names
 D_FILES = $(addsuffix .d,$(D_MODULES))
 # Aggregate all D modules over all OSs (this is for the zip file)
@@ -396,6 +398,9 @@ $(DOC_OUTPUT_DIR)/std_net_%.html : std/net/%.d $(STDDOC)
 	$(DDOC) project.ddoc $(STDDOC) -Df$@ $<
 
 $(DOC_OUTPUT_DIR)/std_digest_%.html : std/digest/%.d $(STDDOC)
+	$(DDOC) project.ddoc $(STDDOC) -Df$@ $<
+
+$(DOC_OUTPUT_DIR)/std_meta_%.html : std/meta/%.d $(STDDOC)
 	$(DDOC) project.ddoc $(STDDOC) -Df$@ $<
 
 $(DOC_OUTPUT_DIR)/etc_c_%.html : etc/c/%.d $(STDDOC)

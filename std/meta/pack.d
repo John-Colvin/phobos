@@ -3,7 +3,7 @@
 /**
    This module contains the definition of the $(D Pack) type, an encapsulated collection of template parameter arguments.
 
-   Author: John L Colvin
+   Authors: John L Colvin and monarch dodra (REAL NAME NEEDED??)
 
    License: $(WEB www.boost.org/LICENSE_1_0.txt, Boost License 1.0)
 
@@ -556,7 +556,9 @@ private template SequenceImpl(alias F, size_t length, size_t stateLength, State)
  * value $(D end) has been reached. $(D begin) defaults to $(D 0), and $(D step)
  * defaults to $(D 1).
  *
- *See also $(XREF range,iota).
+ * See also $(XREF range,iota).
+ *
+ * Originally written by Monarch Dodra
 */
 template Iota(alias end)
 {

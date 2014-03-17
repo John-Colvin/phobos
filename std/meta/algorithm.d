@@ -115,7 +115,7 @@ unittest
     alias TL = Map!(Unqual, Pack!(int, const int, immutable int));
     static assert(is(TL == Pack!(int, int, int)));
 
-    alias Sets = Pack!(Pack!(short, int),Pack!(5,6));
+//    alias Sets = Pack!(Pack!(short, int),Pack!(5,6));
 //    alias Res = Sets.Map!(Tail);
 //    static assert(is(Res == Pack!(Pack!(int), Pack!(6))));
 }
@@ -374,6 +374,7 @@ unittest
     static assert(is(Find!(Pack!(1,2,3,4,5), 6) == Pack!()));
     static assert(is(Find!(Pack!(int, 6, double, 4.6), double) == Pack!(double, 4.6)));
 }
+
 /+
 template Until(TL, alias T)
 {

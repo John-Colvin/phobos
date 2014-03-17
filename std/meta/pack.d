@@ -500,7 +500,8 @@ unittest
     static assert(is(Repeat!(Pack!(), 3) == Pack!(Pack!(), Pack!(), Pack!())));
 }
 
-template Repeat(size_t n)
+//package for now
+package template Repeat(size_t n)
 {
     template Repeat(T ...)
     {
@@ -508,7 +509,10 @@ template Repeat(size_t n)
     }
 }
 
-
+/**
+ * Evaluates to a Pack containing the contents of the $(D Pack) $(D P) repeated
+ * $(D n) times
+ */
 template Cycle(P, size_t n)
     if(isPack!P)
 {
@@ -529,7 +533,12 @@ unittest
 		     == Pack!(int, uint, int, uint)));
 }
 
-
+/**
+ * Evaluates to $(D Pack!S) where $(D S) is a $(D Seq) such that 
+ * $(D S[n] = F!(S[n - State.length .. n])). See $(XREF range, sequence).
+ * The first $(D n) elements of $(D S) are initialized from $(D State).
+ * The final length of $(D S) is equal to $(D length).
+ */
 template Sequence(alias F, size_t length, State ...)
 {
     alias Sequence = SequenceImpl!(F, length, State.length, Pack!(State));
@@ -717,13 +726,20 @@ unittest
     static assert(foo4() == "abcdef");
 }
 
-
+/**
+ * Evaluates to a $(D Pack) of the $(D n)th elements of each of $(D PoP),
+ * where $(D PoP) is a $(D Pack) of $(D Pack)s.
+ */
 template Transversal(PoP, size_t n)
     if(isPack!PoP && All!(PoP, isPack))
 {
     alias Transversal = Map!(Index!(n), PoP);
 }
 
+/**
+ * Evaluates to the first element of each of $(D PoP),
+ * where $(D PoP) is a $(D Pack) of $(D Pack)s.
+ */
 template FrontTransversal(PoP)
     if(isPack!PoP && All!(PoP, isPack))
 {
@@ -731,6 +747,9 @@ template FrontTransversal(PoP)
 }
 
 
+/**
+ * Evaluates to $(D Source), reordered according to $(D Indices).
+ */
 template Indexed(Source, Indices)
     if(isPack!Source && isPack!Indices)
 //should check if indices are valid type
@@ -739,6 +758,11 @@ template Indexed(Source, Indices)
 }
 
 
+/**
+ * Splits $(D Source) in to chunks of length $(D chunkSize). The final Pack
+ * in the returned $(D Pack) of $(D Pack)s contains the $(Source.length % chunkSize)
+ * remaining elements.
+ */
 template Chunks(Source, size_t chunkSize)
     if(isPack!Source)
 {
@@ -754,34 +778,42 @@ template Chunks(Source, size_t chunkSize)
     }
 }
 
+/**
+ * Appends $(D T) to the $(D Pack) $(D Q).
+ */
 template Append(Q, T)
     if(isPack!Q)
 {
     alias Append = Pack!(Q.Unpack, T);
 }
 
-alias Append(T) = PartialApply!(.Append, 1, T);
+//package for now
+package alias Append(T) = PartialApply!(.Append, 1, T);
 
-alias AppendTo(Q) = PartialApply!(.Append, 0, Q);
+package alias AppendTo(Q) = PartialApply!(.Append, 0, Q);
 
+/**
+ * Prepends $(D T) to the $(D Pack) $(D Q).
+ */
 template Prepend(Q, T)
     if(isPack!T)
 {
     alias Prepend = Pack!(T, Q.Unpack);
 }
 
-alias Prepend(T) = PartialApply!(.Prepend, 1, T);
+//package for now
+package alias Prepend(T) = PartialApply!(.Prepend, 1, T);
 
-alias PrependTo(Q) = PartialApply!(.Prepend, 0, Q);
+package alias PrependTo(Q) = PartialApply!(.Prepend, 0, Q);
 
-
-template Concat(A, B)
+//Should be removed, identical to Chain
+package template Concat(A, B)
     if(isPack!A && isPack!B)
 {
     alias Concat = Pack!(A.Unpack, B.Unpack);
 }
 
-template Concat(Packs ...)
+package template Concat(Packs ...)
     if(All!(isPack, Pack!Packs) && Packs.length > 2)
 {
     alias Concat = Concat!(Packs[0], Concat!(Packs[1 .. $]));
@@ -790,8 +822,8 @@ template Concat(Packs ...)
 //zip with stopping policy?
 
 /**
- * Zip for Packs. Results in a Seq containing a Pack for the first elements
- * of the passed Packs, a Pack for the second elements etc.
+ * Zip for $(D Pack)s. Results in a $(D Seq) containing a $(D Pack) of the first elements
+ * of the passed $(D Pack)s, a $(D Pack) for the second elements etc.
  */
 template Zip(Sets ...)
     if(SeqAll!(isPack, Sets))

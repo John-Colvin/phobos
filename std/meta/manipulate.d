@@ -208,6 +208,12 @@ template Take(P, size_t n)
     alias Take = Slice!(P, 0, n);
 }
 
+unittest
+{
+    static assert(is(Take!(Pack!(1,2,3),2) == Pack!(1,2)));
+    static assert(is(Take!(Pack!(1),1) == Pack!(1)));
+}
+
 /**
  * Evaluates to a $(D Pack) of the last $(D P.length - n) elements of $(D P)
  */
@@ -215,6 +221,12 @@ template Drop(P, size_t n)
     if(isPack!P)
 {
     alias Drop = Slice!(P, n, P.length);
+}
+
+unittest
+{
+    static assert(is(Drop!(Pack!(1,2,3), 2) == Pack!(3)));
+    static assert(is(Drop!(Pack!(1), 1) == Pack!()));
 }
 
 /**
@@ -226,6 +238,11 @@ template DropBack(P, size_t n)
     alias DropBack = Slice!(P, 0, P.length - n);
 }
 
+unittest
+{
+    static assert(is(DropBack!(Pack!(1,2,3), 2) == Pack!(1)));
+    static assert(is(DropBack!(Pack!(1), 1) == Pack!()));
+}
 
 /**
  * Repeats A n times.
@@ -316,9 +333,16 @@ private template SequenceImpl(alias F, size_t length, size_t stateLength, State)
     }
     else
     {
-	alias newState = Chain!(State, Pack!(F!(State[$ - stateLength .. $])));
+	alias newState = Chain!(State, Pack!(F!(State.Unpack[$ - stateLength .. $])));
 	alias SequenceImpl = SequenceImpl!(F, length, stateLength, newState);
     }
+}
+
+unittest
+{
+    enum Square(ulong x) = x*x;
+    alias A = Sequence!(Square, 5, 2UL);
+    static assert(AllEqual!(A, Pack!(2, 2^^2, 2^^4, 2^^8, 2^^16)));
 }
 
 /**
@@ -495,9 +519,14 @@ unittest
  * where $(D PoP) is a $(D Pack) of $(D Pack)s.
  */
 template Transversal(PoP, size_t n)
-    if(isPack!PoP && All!(PoP, isPack))
+    if(isPack!PoP && All!(isPack, PoP))
 {
     alias Transversal = Map!(Index!(n), PoP);
+}
+
+unittest
+{
+    static assert(is(Transversal!(Pack!(Pack!(1,2,3),Pack!(4,5,6),Pack!(7,8,9)), 1) == Pack!(2,5,8)));
 }
 
 /**
@@ -505,11 +534,15 @@ template Transversal(PoP, size_t n)
  * where $(D PoP) is a $(D Pack) of $(D Pack)s.
  */
 template FrontTransversal(PoP)
-    if(isPack!PoP && All!(PoP, isPack))
+    if(isPack!PoP && All!(isPack, PoP))
 {
     alias FrontTransversal = Map!(Front, PoP);
 }
 
+unittest
+{
+    static assert(is(FrontTransversal!(Pack!(Pack!(1,2,3),Pack!(4,5,6),Pack!(7,8,9))) == Pack!(1,4,7)));
+}
 
 /**
  * Evaluates to $(D Source), reordered according to $(D Indices).
@@ -521,6 +554,10 @@ template Indexed(Source, Indices)
     alias Indexed = Map!(Index!Source, Indices);
 }
 
+unittest
+{
+    static assert(is(Indexed!(Pack!(3,5,7), Pack!(1,2,0)) == Pack!(5,7,3)));
+}
 
 /**
  * Splits $(D Source) in to chunks of length $(D chunkSize). The final Pack
@@ -542,13 +579,25 @@ template Chunks(Source, size_t chunkSize)
     }
 }
 
+unittest
+{
+    static assert(is(Chunks!(Pack!(1,2,3,4),2) == Pack!(Pack!(1,2),Pack!(3,4))));
+    static assert(is(Chunks!(Pack!(1,2,3,4,5,6,7,8),3) == Pack!(Pack!(1,2,3),Pack!(4,5,6),Pack!(7,8))));
+}
+
 /**
  * Appends $(D T) to the $(D Pack) $(D Q).
  */
-template Append(Q, T)
-    if(isPack!Q)
+template Append(Q, T...)
+    if(isPack!Q && T.length == 1)
 {
     alias Append = Pack!(Q.Unpack, T);
+}
+
+unittest
+{
+    static assert(is(Append!(Pack!(1,2,3),4) == Pack!(1,2,3,4)));
+    static assert(is(Append!(Pack!(), Pack!()) == Pack!(Pack!())));
 }
 
 //package for now

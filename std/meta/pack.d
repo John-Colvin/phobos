@@ -15,6 +15,7 @@ module std.meta.pack;
 import std.meta.algorithm;
 import std.meta.seq;
 import std.meta.functional;
+import std.meta.manipulate;
 import std.traits;
 
 
@@ -35,11 +36,6 @@ struct Pack(T...)
 
     @disable this();
 
-    //doesn't really work properly with indexing.
-    //often the indexing never actually happens, unittests break
-    //and pragma msgs show Pack!(blah)[0]
-    // alias Unpack this;
-
     /*
      * UFCS for Packs.
      * takes care of all first argument functions
@@ -50,12 +46,6 @@ struct Pack(T...)
     //parameter we could import from / compile using, this would be better
     template opDispatch(string s)
     {
-//        static assert(0);
-        /+
-	template opDispatch(TL ...)
-	{
-	    mixin("alias opDispatch = " ~ s ~ "!(typeof(this), TL);");
-	}+/
 	mixin("alias opDispatch = PartialApply!(." ~ s ~ ", 0, typeof(this));");
     }
 

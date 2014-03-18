@@ -26,3 +26,4 @@ public import std.meta.seq;
 public import std.meta.pack;
 public import std.meta.functional;
 public import std.meta.algorithm;
+public import std.meta.manipulate;

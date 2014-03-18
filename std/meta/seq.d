@@ -8,6 +8,7 @@ can be used.
 module std.meta.seq;
 
 import std.meta.pack;
+import std.meta.manipulate;
 import std.meta.algorithm : Equal, AllEqual;
 
 /**

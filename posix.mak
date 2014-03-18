@@ -188,7 +188,7 @@ STD_NET_MODULES = $(addprefix std/net/, isemail curl)
 
 STD_DIGEST_MODULES = $(addprefix std/digest/, digest crc md ripemd sha)
 
-STD_META_MODULES = $(addprefix std/meta/, algorithm functional package pack seq)
+STD_META_MODULES = $(addprefix std/meta/, algorithm functional package pack seq manipulate)
 
 # OS-specific D modules
 EXTRA_MODULES_LINUX := $(addprefix std/c/linux/, linux socket)

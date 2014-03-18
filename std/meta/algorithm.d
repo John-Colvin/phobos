@@ -3,6 +3,7 @@ module std.meta.algorithm;
 import std.meta.seq;
 import std.meta.pack;
 import std.meta.functional;
+import std.meta.manipulate;
 import std.traits;
 
 /**

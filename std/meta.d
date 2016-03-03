@@ -949,17 +949,56 @@ template aliasSeqOf(alias range)
     alias ArrT = typeof(range);
     static if (isArray!ArrT && !isNarrowString!ArrT)
     {
-        static if (range.length == 0)
+        static if (range.length > 8)
         {
-            alias aliasSeqOf = AliasSeq!();
+            alias aliasSeqOf = AliasSeq!(aliasSeqOf!(range[0 .. $/2]), aliasSeqOf!(range[$/2 .. $]));
+        }
+        else static if (range.length == 8)
+        {
+            alias aliasSeqOf = AliasSeq!(
+                range[ 0], range[ 1], range[ 2], range[ 3],
+                range[ 4], range[ 5], range[ 6], range[ 7]);
+        }
+        else static if (range.length == 7)
+        {
+            alias aliasSeqOf = AliasSeq!(
+                range[ 0], range[ 1], range[ 2], range[ 3],
+                range[ 4], range[ 5], range[ 6]);
+        }
+        else static if (range.length == 6)
+        {
+            alias aliasSeqOf = AliasSeq!(
+                range[ 0], range[ 1], range[ 2], range[ 3],
+                range[ 4], range[ 5]);
+        }
+        else static if (range.length == 5)
+        {
+            alias aliasSeqOf = AliasSeq!(
+                range[ 0], range[ 1], range[ 2], range[ 3],
+                range[ 4]);
+        }
+        else static if (range.length == 4)
+        {
+            alias aliasSeqOf = AliasSeq!(
+                range[ 0], range[ 1], range[ 2], range[ 3]);
+        }
+        else static if (range.length == 3)
+        {
+            alias aliasSeqOf = AliasSeq!(
+                range[ 0], range[ 1], range[ 2]);
+        }
+        else static if (range.length == 2)
+        {
+            alias aliasSeqOf = AliasSeq!(
+                range[ 0], range[ 1]);
         }
         else static if (range.length == 1)
         {
-            alias aliasSeqOf = AliasSeq!(range[0]);
+            alias aliasSeqOf = AliasSeq!(range[ 0]);
         }
         else
         {
-            alias aliasSeqOf = AliasSeq!(aliasSeqOf!(range[0 .. $/2]), aliasSeqOf!(range[$/2 .. $]));
+            alias aliasSeqOf = AliasSeq!();
         }
     }
     else static if (isInputRange!ArrT)

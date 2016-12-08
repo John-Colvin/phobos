@@ -3169,14 +3169,6 @@ static:
     }
 
 private:
-    // Returns the length of an environment variable (in number of
-    // wchars, including the null terminator), or 0 if it doesn't exist.
-    version (Windows)
-    int varLength(LPCWSTR namez) @trusted nothrow
-    {
-        return GetEnvironmentVariableW(namez, null, 0);
-    }
-
     // Retrieves the environment variable, returns false on failure.
     bool getImpl(in char[] name, out string value) @trusted
     {
@@ -3184,17 +3176,28 @@ private:
         {
             import std.conv : to;
             const namezTmp = name.tempCStringW();
-            immutable len = varLength(namezTmp);
-            if (len == 0) return false;
-            if (len == 1)
+            // clear previous errors
+            SetLastError(NO_ERROR);
+            // https://msdn.microsoft.com/en-us/library/windows/desktop/ms683188.aspx
+            // says return value does not include terminating null
+            immutable len = GetEnvironmentVariableW(namez, null, 0);
+            if (len == 0)
             {
-                value = "";
-                return true;
+                if (GetLastError() == NO_ERROR)
+                {
+                    value = "";
+                    return true;
+                }
+                else
+                    return false;
             }
-
-            auto buf = new WCHAR[len];
-            GetEnvironmentVariableW(namezTmp, buf.ptr, to!DWORD(buf.length));
-            value = toUTF8(buf[0 .. $-1]);
+            auto buf = new WCHAR[len + 1];
+            // checking for 0 is sufficient because a successful call with length 0 is
+            // already handled, so 0 must be an error (assuming no race condition with
+            // another process setting the variable to "")
+            if (GetEnvironmentVariableW(namezTmp, buf.ptr, to!DWORD(buf.length)) == 0)
+                return false;
+            value = toUTF8(buf[0 .. len]);
             return true;
         }
         else version (Posix)
@@ -3229,9 +3232,9 @@ private:
     environment["std_process"] = "foo";
     assert (environment["std_process"] == "foo");
 
-    // Set variable again
-    environment["std_process"] = "bar";
-    assert (environment["std_process"] == "bar");
+    // Set variable again (also tests length 1 case)
+    environment["std_process"] = "b";
+    assert (environment["std_process"] == "b");
 
     // Remove variable
     environment.remove("std_process");
@@ -3248,12 +3251,11 @@ private:
     // get() with default value
     assert (environment.get("std_process", "baz") == "baz");
 
-    version (Posix)
-    {
-        // get() on an empty (but present) value
-        environment["std_process"] = "";
-        assert(environment.get("std_process") !is null);
-    }
+    // get() on an empty (but present) value
+    environment["std_process"] = "";
+    auto res = environment.get("std_process");
+    assert(res !is null);
+    assert(res == "");
 
     // Convert to associative array
     auto aa = environment.toAA();

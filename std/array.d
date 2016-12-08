@@ -335,7 +335,6 @@ ElementType!String[] array(String)(String str) if (isNarrowString!String)
     )));
 }
 
-
 /**
  * Return a static array filled with elements from a range.
  *
@@ -344,13 +343,20 @@ ElementType!String[] array(String)(String str) if (isNarrowString!String)
  * Returns:
  *      initialized static array
 */
-auto staticArray(alias range)()
+template staticArray(alias range)
 if (isIterable!(typeof(range)) && !isInfinite!(typeof(range)))
 {
     import std.array : array;
     enum arr = array(range);
-    enum sA = .staticArray(arr);
-    return sA;
+    enum ForeachType!(typeof(arr))[arr.length] sA = arr;
+    alias T = typeof(sA);
+    pragma(msg, T);
+
+    ref auto staticArray(T ret = T.init)
+    {
+        ret = sA;
+        return ret;
+    }
 }
 
 ///
@@ -373,13 +379,14 @@ if (isIterable!(typeof(range)) && !isInfinite!(typeof(range)))
  * Optionally, a target type can be provided as the first template argument, which will result
  * in a static array with that element type.
 */
-T[N] staticArray(size_t N, T)(T[N] a)
+ref T[N] staticArray(size_t N, T)(T[N] a, T[N] ret = T[N].init)
 {
-    return a;
+    ret = a;
+    return ret;
 }
 
 /// ditto
-TargetElemT[N] staticArray(TargetElemT, size_t N, T)(T[N] a)
+TargetElemT[N] staticArray(TargetElemT, size_t N, T)(T[N] a, TargetElemT[N] ret = TargetElemT[N].init)
 {
     Unqual!(TargetElemT)[N] result = void;
 
@@ -412,8 +419,17 @@ TargetElemT[N] staticArray(TargetElemT, size_t N, T)(T[N] a)
     static assert(sa3.length == 2);
     assert(sa3 == [1, 2]);
 
+    int x = 4;
+    auto sa4 = staticArray([x, 3]);
+    static assert(is(typeof(sa4) == int[2]));
+    assert(sa4 == [4, 3]);
+
+    auto sa5 = staticArray!long([x, 3]);
+    static assert(is(typeof(sa5) == long[2]));
+    assert(sa5 == [4L, 3L]);
+
     version(none)
-        auto sa4 = staticArray(a[]); // not possible
+        auto sa5 = staticArray(a[]); // not possible
 }
 
 ///

@@ -5692,28 +5692,39 @@ mixin template Proxy(alias a)
         static if (is(typeof(__traits(getMember, a, name)) == function))
         {
             // non template function
-            auto ref opDispatch(this X, Args...)(auto ref Args args) { return mixin("a."~name~"(args)"); }
+            auto ref opDispatch(this X, Args...)(auto ref Args args) { return __traits(getMember, a, name)(args); }
         }
-        else static if (is(typeof({ enum x = mixin("a."~name); })))
+        else static if (is(typeof({ enum x = __traits(getMember, a, name); })))
         {
             // built-in type field, manifest constant, and static non-mutable field
-            enum opDispatch = mixin("a."~name);
+            enum opDispatch = __traits(getMember, a, name);
         }
-        else static if (is(typeof(mixin("a."~name))) || __traits(getOverloads, a, name).length != 0)
+        else static if (is(typeof(__traits(getMember, a, name)))
+                && AliasSeq!(typeof(__traits(getMember, a, name))).length == 1)
         {
             // field or property function
-            @property auto ref opDispatch(this X)()                { return mixin("a."~name);        }
-            @property auto ref opDispatch(this X, V)(auto ref V v) { return mixin("a."~name~" = v"); }
+            @property auto ref opDispatch(this X)()                { return __traits(getMember, a, name); }
+            @property auto ref opDispatch(this X, V)(auto ref V v) { return __traits(getMember, a, name) = v; }
         }
-        else
+        else static if (__traits(isTemplate, __traits(getMember, a, name)))
         {
             // member template
             template opDispatch(T...)
             {
                 enum targs = T.length ? "!T" : "";
+
                 auto ref opDispatch(this X, Args...)(auto ref Args args){ return mixin("a."~name~targs~"(args)"); }
             }
         }
+        else static if (__traits(compiles, { alias p = Alias!(__traits(getMember, a, name)); }))
+        {
+            alias opDispatch = Alias!(__traits(getMember, a, name));
+        }
+        else static if (__traits(compiles, { alias p = AliasSeq!(__traits(getMember, a, name)); }))
+        {
+            alias opDispatch = AliasSeq!(__traits(getMember, a, name));
+        }
+        else static assert(0);
     }
 
     import std.traits : isArray;
@@ -5793,31 +5804,6 @@ mixin template Proxy(alias a)
 
     NewObjectType not = new Object();
     assert(__traits(compiles, not.toHash()));
-}
-
-/**
-    There is one exception to the fact that the new type is not related to the
-    old type. $(DDSUBLINK spec/function,pseudo-member, Pseudo-member)
-    functions are usable with the new type; they will be forwarded on to the
-    proxied value.
- */
-@safe unittest
-{
-    import std.math;
-
-    float f = 1.0;
-    assert(!f.isInfinity);
-
-    struct NewFloat
-    {
-        float _;
-        mixin Proxy!_;
-
-        this(float f) { _ = f; }
-    }
-
-    NewFloat nf = 1.0f;
-    assert(!nf.isInfinity);
 }
 
 @safe unittest
@@ -6531,6 +6517,71 @@ template TypedefType(T)
     char[] s2 = cast(char[]) cs;
     const(char)[] cs2 = cast(const(char)[])s;
     assert(s2 == cs2);
+}
+
+version(unittest)
+{
+    private int _TypedefTest_global_n;
+}
+
+unittest
+{
+    import std.meta : AliasSeq;
+
+    int n;
+
+    //TODO: re-enable the commented tests and fix Proxy for them
+    struct S
+    {
+        alias X = int;
+        //alias Y() = int;
+        //alias Z(Q) = Q;
+        alias A = AliasSeq!(n, float);
+        //alias B() = AliasSeq!(n, float);
+        //alias C(e...) = AliasSeq!(e, float);
+        alias D = AliasSeq!(int, float);
+        //alias AS(Args ...) = AliasSeq!Args;
+    }
+
+    //alias TS = S; //for testing the tests without Typedef
+    alias TS = Typedef!S;
+
+    TS.X x;
+    static assert(is(typeof(x) == int));
+
+    /+alias Y = TS.Y;
+    Y!() y;
+    static assert(is(typeof(y) == int));
+    TS.Z!int z;
+    static assert(is(typeof(z) == int));
+    +/
+
+    alias a = TS.opDispatch!"A"; // https://issues.dlang.org/show_bug.cgi?id=17223
+    a[0] = 3;
+    assert(n == 3);
+    static assert(is(a[1] == float));
+    /+
+    alias b = TS.B!();
+    b[0] = 4;
+    assert(n == 4);
+    static assert(is(b[1] == float));
+    alias c = TS.C!_TypedefTest_global_n;
+    c[0] = 4;
+    assert(_TypedefTest_global_n == 4);
+    static assert(is(c[1] == float));
+    +/
+
+    S.D d;
+    static assert(is(typeof(d) == AliasSeq!(int, float)));
+
+    /+
+    alias AS = TS.AS;
+    alias L = AS!(_TypedefTest_global_n, int, 4);
+    alias R = AliasSeq!(_TypedefTest_global_n, int, 4);
+    assert(L[0] is R[0]);
+    assert(is(L[1] == R[1]));
+    assert(L[2] == R[2]);
+    +/
 }
 
 /**

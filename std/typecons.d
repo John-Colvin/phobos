@@ -5705,14 +5705,25 @@ mixin template Proxy(alias a)
             @property auto ref opDispatch(this X)()                { return mixin("a."~name);        }
             @property auto ref opDispatch(this X, V)(auto ref V v) { return mixin("a."~name~" = v"); }
         }
-        else
+
+        else static if (__traits(isTemplate, mixin("a."~name)))
         {
+/+
             // member template
             template opDispatch(T...)
             {
                 enum targs = T.length ? "!T" : "";
+
                 auto ref opDispatch(this X, Args...)(auto ref Args args){ return mixin("a."~name~targs~"(args)"); }
+            }+/
+            template opDispatch(T ...)
+            {
+                alias opDispatch = AliasSeq!(mixin("a."~name~"!(T)"))[0];
             }
+        }
+        else static if (__traits(compiles, "a."~name))
+        {
+            alias opDispatch = Alias!(mixin("a."~name));
         }
     }
 
@@ -6531,6 +6542,60 @@ template TypedefType(T)
     char[] s2 = cast(char[]) cs;
     const(char)[] cs2 = cast(const(char)[])s;
     assert(s2 == cs2);
+}
+
+version(unittest)
+{
+    private int _TypedefTest_global_n;
+}
+
+unittest
+{
+    import std.meta : AliasSeq;
+
+    int n;
+
+    struct S
+    {
+        alias X = int;
+        static template Y() { alias Y = int; }
+        alias Z(Q) = Q;
+        alias A = AliasSeq!(n, float);
+        alias B() = AliasSeq!(n, float);
+        alias C(e...) = AliasSeq!(e, float);
+        alias AS(Args ...) = AliasSeq!Args;
+    }
+
+    //alias TS = S; //for testing the tests without Typedef
+    alias TS = Typedef!S;
+
+    TS.X x;
+    static assert(is(typeof(x) == int));
+    alias Y = TS.opDispatch!"Y";
+    Y!() y;
+    static assert(is(typeof(y) == int));
+    TS.Z!int z;
+    static assert(is(typeof(z) == int));
+
+    alias a = TS.A;
+    a[0] = 3;
+    assert(n == 3);
+    static assert(is(a[1] == float));
+    alias b = TS.B!();
+    b[0] = 4;
+    assert(n == 4);
+    static assert(is(b[1] == float));
+    alias c = TS.C!_TypedefTest_global_n;
+    c[0] = 4;
+    assert(_TypedefTest_global_n == 4);
+    static assert(is(c[1] == float));
+
+    alias AS = TS.AS;
+    alias L = AS!(_TypedefTest_global_n, int, 4);
+    alias R = AliasSeq!(_TypedefTest_global_n, int, 4);
+    assert(L[0] is R[0]);
+    assert(is(L[1] == R[1]));
+    assert(L[2] == R[2]);
 }
 
 /**

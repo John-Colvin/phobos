@@ -1128,7 +1128,6 @@ import std.traits : isIterable;
 template aliasSeqOf(alias iter)
 if (isIterable!(typeof(iter)))
 {
-    import std.traits : isNarrowString;
     import std.array : array;
 
     struct Impl

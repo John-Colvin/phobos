@@ -1542,7 +1542,7 @@ if (is(Unqual!T == T))
     return SliceOverIndexed!T(a, b, x);
 }
 
-@system unittest
+@safe unittest
 {
     int[] idxArray = [2, 3, 5, 8, 13];
     auto sliced = sliceOverIndexed(0, idxArray.length, &idxArray);
@@ -3126,7 +3126,7 @@ private:
     CowArray!SP data;
 }
 
-pure @system unittest
+pure @safe unittest
 {
     import std.conv : to;
     assert(unicode.ASCII.to!string() == "[0..128)");
@@ -5416,7 +5416,7 @@ pure @safe unittest
 }
 
 // cover decode fail cases of Matcher
-pure @system unittest
+pure @safe unittest
 {
     import std.algorithm.iteration : map;
     import std.exception : collectException;
@@ -5433,7 +5433,7 @@ pure @system unittest
             auto s = msg;
             size_t idx = 0;
             utf8.test(s);
-        }()), format("%( %2x %)", cast(ubyte[]) msg));
+        }()), format("%( %2x %)", cast(immutable(ubyte)[]) msg));
     }
     //decode failure cases UTF-16
     alias fails16 = AliasSeq!([0xD811], [0xDC02]);
@@ -7148,7 +7148,7 @@ if (isInputRange!Input && is(Unqual!(ElementType!Input) == dchar))
     return genericDecodeGrapheme!true(inp);
 }
 
-@system unittest
+@safe unittest
 {
     import std.algorithm.comparison : equal;
 
@@ -7231,7 +7231,7 @@ if (isInputRange!Range && is(Unqual!(ElementType!Range) == dchar))
 
 // For testing non-forward-range input ranges
 version(unittest)
-private static struct InputRangeString
+private static @safe struct InputRangeString
 {
     private string s;
 
@@ -7240,7 +7240,7 @@ private static struct InputRangeString
     void popFront() { s.popFront(); }
 }
 
-@system unittest
+@safe unittest
 {
     import std.algorithm.comparison : equal;
     import std.array : array;
@@ -7362,7 +7362,7 @@ if (isInputRange!Range && is(Unqual!(ElementType!Range) == dchar))
     assert(reverse == "le\u0308on"); // lëon
 }
 
-@system unittest
+@safe unittest
 {
     import std.algorithm.comparison : equal;
     import std.range.primitives : walkLength;
@@ -7521,7 +7521,7 @@ public:
     }
 
     ///
-    @system unittest
+    @safe unittest
     {
         import std.algorithm.comparison : equal;
         auto g = Grapheme("A");
@@ -7652,7 +7652,7 @@ private:
 static assert(Grapheme.sizeof == size_t.sizeof*4);
 
 
-@system pure /*nothrow @nogc*/ unittest // TODO: string .front is GC and throw
+@safe pure /*nothrow @nogc*/ unittest // TODO: string .front is GC and throw
 {
     import std.algorithm.comparison : equal;
     Grapheme[3] data = [Grapheme("Ю"), Grapheme("У"), Grapheme("З")];
@@ -7660,7 +7660,7 @@ static assert(Grapheme.sizeof == size_t.sizeof*4);
 }
 
 ///
-@system unittest
+@safe unittest
 {
     import std.algorithm.comparison : equal;
     import std.algorithm.iteration : filter;
@@ -7706,7 +7706,7 @@ static assert(Grapheme.sizeof == size_t.sizeof*4);
     assert(!g.valid);
 }
 
-@system unittest
+@safe unittest
 {
     import std.algorithm.comparison : equal;
     import std.algorithm.iteration : map;
@@ -8115,7 +8115,7 @@ package auto simpleCaseFoldings(dchar ch) @safe
     return Range(start, entry.size);
 }
 
-@system unittest
+@safe unittest
 {
     import std.algorithm.comparison : equal;
     import std.algorithm.searching : canFind;
@@ -8266,7 +8266,7 @@ public Grapheme decompose(UnicodeDecomposition decompType=Canonical)(dchar ch) @
 }
 
 ///
-@system unittest
+@safe unittest
 {
     import std.algorithm.comparison : equal;
 
@@ -8374,7 +8374,7 @@ Grapheme decomposeHangul(dchar ch) @safe
 }
 
 ///
-@system unittest
+@safe unittest
 {
     import std.algorithm.comparison : equal;
     assert(decomposeHangul('\uD4DB')[].equal("\u1111\u1171\u11B6"));
@@ -8414,7 +8414,7 @@ dchar composeJamo(dchar lead, dchar vowel, dchar trailing=dchar.init) pure nothr
     assert(composeJamo('A', '\u1171') == dchar.init);
 }
 
-@system unittest
+@safe unittest
 {
     import std.algorithm.comparison : equal;
     import std.conv : text;
@@ -9942,7 +9942,7 @@ if (isSomeString!S)
     assert(s2 !is s1);
 }
 
-@system unittest
+@safe unittest
 {
     static void doTest(C)(const(C)[] s, const(C)[] trueUp, const(C)[] trueLow)
     {
@@ -9955,9 +9955,9 @@ if (isSomeString!S)
         assert(low == trueLow, format(diff, low, trueLow));
         assert(up == trueUp,  format(diff, up, trueUp));
         assert(lowInp == trueLow,
-            format(diff, cast(ubyte[]) s, cast(ubyte[]) lowInp, cast(ubyte[]) trueLow));
+            format(diff, cast(const(ubyte)[]) s, cast(const(ubyte)[]) lowInp, cast(const(ubyte)[]) trueLow));
         assert(upInp == trueUp,
-            format(diff, cast(ubyte[]) s, cast(ubyte[]) upInp, cast(ubyte[]) trueUp));
+            format(diff, cast(const(ubyte)[]) s, cast(const(ubyte)[]) upInp, cast(const(ubyte)[]) trueUp));
     }
     static foreach (S; AliasSeq!(dstring, wstring, string))
     {{

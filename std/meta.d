@@ -1121,12 +1121,13 @@ template templateOr(Preds...)
 }
 
 import std.traits : isIterable;
+import std.range.primitives : isInfinite;
 
 /**
  * Converts any foreach-iterable (e.g. an input range) `iter` to an alias sequence.
  */
 template aliasSeqOf(alias iter)
-if (isIterable!(typeof(iter)))
+if (isIterable!(typeof(iter)) && !isInfinite!(typeof(iter)))
 {
     import std.array : array;
 
@@ -1207,6 +1208,19 @@ if (isIterable!(typeof(iter)))
         }
     }
     static assert(aliasSeqOf!(S.init) == AliasSeq!(3, 4));
+}
+
+@safe unittest
+{
+    struct Infinite
+    {
+        int front();
+        void popFront();
+        enum empty = false;
+    }
+    enum infinite = Infinite();
+    static assert(isInfinite!Infinite);
+    static assert(!__traits(compiles, aliasSeqOf!infinite));
 }
 
 /**

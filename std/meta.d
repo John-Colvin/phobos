@@ -1127,11 +1127,21 @@ template templateOr(Preds...)
 template aliasSeqOf(alias iter)
 if (isIterable!(typeof(iter)) && !isInfinite!(typeof(iter)))
 {
-    import std.array : array;
+    import std.traits : isArray, isNarrowString;
+    import std.range.primitives : isInputRange;
+    import std.range : enumerate;
+
+    alias Iter = typeof(iter);
 
     struct Impl
     {
-        static foreach (size_t i, el; iter.array)
+        static if ((isArray!Iter && !isNarrowString!Iter)
+                || !isInputRange!Iter)
+            enum iterable = iter;
+        else
+            enum iterable = iter.enumerate;
+
+        static foreach (size_t i, el; iterable)
             mixin(`auto e` ~ i.stringof ~ ` = el;`);
     }
     enum aliasSeqOf = Impl.init.tupleof;

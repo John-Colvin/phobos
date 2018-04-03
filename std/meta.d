@@ -1123,7 +1123,7 @@ template templateOr(Preds...)
 import std.traits : isIterable;
 
 /**
- * Converts any foreach-iterable (e.g. an input range) $(D range) to an alias sequence.
+ * Converts any foreach-iterable (e.g. an input range) `iter` to an alias sequence.
  */
 template aliasSeqOf(alias iter)
 if (isIterable!(typeof(iter)))

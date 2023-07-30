@@ -446,6 +446,7 @@ bool isWhite(dchar c) @safe pure nothrow @nogc
     Params: c = The character to test.
     Returns: Whether `c` is a control character.
   +/
+pragma(inline, true)
 bool isControl(dchar c) @safe pure nothrow @nogc
 {
     return c < 0x20 || c == 0x7F;

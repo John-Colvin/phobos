@@ -1134,6 +1134,33 @@ if (isSomeFiniteCharInputRange!T)
         import std.utf : encode, decode;
 
         auto str = appender!string();
+        static if (is(T : const(char)[]))
+        {
+            auto strStart = json;
+            size_t strLen = 0;
+            void addChar(Char c)
+            {
+                ++strLen;
+            }
+            void markStart()
+            {
+                strStart = json;
+                strLen = 0;
+            }
+            void flush()
+            {
+                str.put(strStart[0 .. strLen]);
+            }
+        }
+        else
+        {
+            void addChar(Char c)
+            {
+                str.put(c);
+            }
+            void markStart() { }
+            void flush() { }
+        }
 
     Next:
         switch (peekChar())
@@ -1143,6 +1170,7 @@ if (isSomeFiniteCharInputRange!T)
                 break;
 
             case '\\':
+                flush();
                 getChar();
                 auto c = getChar();
                 switch (c)
@@ -1185,6 +1213,7 @@ if (isSomeFiniteCharInputRange!T)
                     default:
                         error(text("Invalid escape sequence '\\", c, "'."));
                 }
+                markStart();
                 goto Next;
 
             default:
@@ -1197,9 +1226,10 @@ if (isSomeFiniteCharInputRange!T)
                 auto c = getChar();
                 if (c < 0x20 && (strict || c != 0))
                     error("Illegal control character.");
-                str.put(c);
+                addChar(c);
                 goto Next;
         }
+        flush();
 
         return str.data.length ? str.data : "";
     }
@@ -1266,7 +1296,7 @@ if (isSomeFiniteCharInputRange!T)
                     break;
                 }
 
-                JSONValue[] arr;
+                auto arr = appender!(JSONValue[]);
                 do
                 {
                     skipWhitespace();
@@ -1281,7 +1311,7 @@ if (isSomeFiniteCharInputRange!T)
                 while (testChar(','));
 
                 checkChar(']');
-                value.array = arr;
+                value.array = arr.data;
                 break;
 
             case '"':

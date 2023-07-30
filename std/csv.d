@@ -1321,6 +1321,12 @@ public:
         prime();
     }
 
+    this(ref return inout scope CsvRecord rhs) inout @trusted
+    {
+        this._front = rhs._front;
+        this.tupleof = rhs.tupleof;
+    }
+
     /**
      * Part of an input range as defined by
      * $(REF isInputRange, std,range,primitives).

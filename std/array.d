@@ -3496,6 +3496,7 @@ if (isDynamicArray!A)
     }
 
     private Data* _data;
+    private Data valueData;
 
     /**
      * Constructs an `Appender` with a given array.  Note that this does not copy the
@@ -3505,8 +3506,7 @@ if (isDynamicArray!A)
      */
     this(A arr) @trusted
     {
-        // initialize to a given array.
-        _data = new Data;
+        _data = &valueData;
         _data.arr = cast(Unqual!T[]) arr; //trusted
 
         if (__ctfe)
@@ -3524,6 +3524,35 @@ if (isDynamicArray!A)
                 arr.length = cap;
         }
         _data.capacity = arr.length;
+    }
+
+    this(ref return const scope Appender rhs) @trusted const
+    {
+        if (rhs._data is &rhs.valueData)
+        {
+            valueData = Data(rhs._data.capacity,
+                             cast(typeof(Data.arr)) rhs._data.arr,
+                             rhs._data.tryExtendBlock);
+            _data = &valueData;
+        }
+        else
+        {
+            _data = rhs._data;
+        }
+    }
+
+    this(ref return scope Appender rhs) @trusted
+    {
+        if (rhs._data is &rhs.valueData)
+        {
+            _data = new Data(rhs._data.capacity, rhs._data.arr,
+                             rhs._data.tryExtendBlock);
+            rhs._data = _data;
+        }
+        else
+        {
+            _data = rhs._data;
+        }
     }
 
     /**
@@ -3578,10 +3607,10 @@ if (isDynamicArray!A)
     }
 
     // ensure we can add nelems elements, resizing as necessary
-    private void ensureAddable(size_t nelems)
+    private void ensureAddable(size_t nelems) scope @trusted
     {
         if (!_data)
-            _data = new Data;
+            _data = &valueData;
         immutable len = _data.arr.length;
         immutable reqlen = len + nelems;
 

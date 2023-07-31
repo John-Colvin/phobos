@@ -632,7 +632,7 @@ if (isSomeString!S && (isSomeFiniteCharInputRange!R || is(StringTypeOf!R)))
 
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.bitmanip : append, Endian;
     import std.exception : assertThrown;
     import std.path : buildPath;
@@ -656,28 +656,28 @@ if (isSomeString!S && (isSomeFiniteCharInputRange!R || is(StringTypeOf!R)))
     write(utf8, (cast(char[])[0xEF, 0xBB, 0xBF]) ~ "京都市");
     {
         auto str = "\uFEFF京都市"w;
-        auto arr = appender!(ubyte[])();
+        auto arr = fixedAppender!(ubyte[])();
         foreach (c; str)
             arr.append(c);
         write(utf16be, arr.data);
     }
     {
         auto str = "\uFEFF京都市"w;
-        auto arr = appender!(ubyte[])();
+        auto arr = fixedAppender!(ubyte[])();
         foreach (c; str)
             arr.append!(ushort, Endian.littleEndian)(c);
         write(utf16le, arr.data);
     }
     {
         auto str = "\U0000FEFF京都市"d;
-        auto arr = appender!(ubyte[])();
+        auto arr = fixedAppender!(ubyte[])();
         foreach (c; str)
             arr.append(c);
         write(utf32be, arr.data);
     }
     {
         auto str = "\U0000FEFF京都市"d;
-        auto arr = appender!(ubyte[])();
+        auto arr = fixedAppender!(ubyte[])();
         foreach (c; str)
             arr.append!(uint, Endian.littleEndian)(c);
         write(utf32le, arr.data);
@@ -5260,14 +5260,14 @@ auto dirEntries(bool useDIP1000 = dip1000Enabled)
 Select!(Types.length == 1, Types[0][], Tuple!(Types)[])
 slurp(Types...)(string filename, scope const(char)[] format)
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.conv : text;
     import std.exception : enforce;
     import std.format.read : formattedRead;
     import std.stdio : File;
     import std.string : stripRight;
 
-    auto app = appender!(typeof(return))();
+    auto app = fixedAppender!(typeof(return))();
     ElementType!(typeof(return)) toAdd;
     auto f = File(filename);
     scope(exit) f.close();

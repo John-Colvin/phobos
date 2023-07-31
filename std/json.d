@@ -912,7 +912,7 @@ struct JSONValue
     }
 
     ///
-    void toString(Out)(Out sink, in JSONOptions options = JSONOptions.none) const
+    void toString(Out)(auto ref Out sink, in JSONOptions options = JSONOptions.none) const
     {
         toJSON(sink, this, false, options);
     }
@@ -929,7 +929,7 @@ struct JSONValue
     }
 
     ///
-    void toPrettyString(Out)(Out sink, in JSONOptions options = JSONOptions.none) const
+    void toPrettyString(Out)(auto ref Out sink, in JSONOptions options = JSONOptions.none) const
     {
         toJSON(sink, this, true, options);
     }
@@ -1133,7 +1133,7 @@ if (isSomeFiniteCharInputRange!T)
         import std.uni : isSurrogateHi, isSurrogateLo;
         import std.utf : encode, decode;
 
-        auto str = appender!string();
+        auto str = fixedAppender!string();
 
     Next:
         switch (peekChar())
@@ -1301,7 +1301,7 @@ if (isSomeFiniteCharInputRange!T)
 
             case '0': .. case '9':
             case '-':
-                auto number = appender!string();
+                auto number = fixedAppender!string();
                 bool isFloat, isNegative;
 
                 void readInteger()
@@ -1498,7 +1498,7 @@ Set the $(LREF JSONOptions.specialFloatLiterals) flag is set in `options` to enc
 */
 string toJSON(const ref JSONValue root, in bool pretty = false, in JSONOptions options = JSONOptions.none) @safe
 {
-    auto json = appender!string();
+    auto json = fixedAppender!string();
     toJSON(json, root, pretty, options);
     return json.data;
 }
@@ -2411,12 +2411,12 @@ pure nothrow @safe unittest
 // https://issues.dlang.org/show_bug.cgi?id=20330
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
 
     string s = `{"a":[1,2,3]}`;
     JSONValue j = parseJSON(s);
 
-    auto app = appender!string();
+    auto app = fixedAppender!string();
     j.toString(app);
 
     assert(app.data == s, app.data);
@@ -2425,7 +2425,7 @@ pure nothrow @safe unittest
 // https://issues.dlang.org/show_bug.cgi?id=20330
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format.write : formattedWrite;
 
     string s =
@@ -2438,7 +2438,7 @@ pure nothrow @safe unittest
 }`;
     JSONValue j = parseJSON(s);
 
-    auto app = appender!string();
+    auto app = fixedAppender!string();
     j.toPrettyString(app);
 
     assert(app.data == s, app.data);

@@ -2582,11 +2582,11 @@ alias KeepTerminator = Flag!"keepTerminator";
 C[][] splitLines(C)(C[] s, KeepTerminator keepTerm = No.keepTerminator) @safe pure
 if (isSomeChar!C)
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.uni : lineSep, paraSep;
 
     size_t iStart = 0;
-    auto retval = appender!(C[][])();
+    auto retval = fixedAppender!(C[][])();
 
     for (size_t i; i < s.length; ++i)
     {
@@ -5284,8 +5284,8 @@ C1[] translate(C1, C2 = immutable char)(C1[] str,
                                         const(C2)[] toRemove = null) @safe pure
 if (isSomeChar!C1 && isSomeChar!C2)
 {
-    import std.array : appender;
-    auto buffer = appender!(C1[])();
+    import std.array : fixedAppender;
+    auto buffer = fixedAppender!(C1[])();
     translateImpl(str, transTable, toRemove, buffer);
     return buffer.data;
 }
@@ -5368,8 +5368,8 @@ C1[] translate(C1, S, C2 = immutable char)(C1[] str,
                                            const(C2)[] toRemove = null) @safe pure
 if (isSomeChar!C1 && isSomeString!S && isSomeChar!C2)
 {
-    import std.array : appender;
-    auto buffer = appender!(C1[])();
+    import std.array : fixedAppender;
+    auto buffer = fixedAppender!(C1[])();
     translateImpl(str, transTable, toRemove, buffer);
     return buffer.data;
 }
@@ -5443,7 +5443,7 @@ if (isSomeChar!C1 && isSomeString!S && isSomeChar!C2)
 void translate(C1, C2 = immutable char, Buffer)(const(C1)[] str,
                                         in dchar[dchar] transTable,
                                         const(C2)[] toRemove,
-                                        Buffer buffer)
+                                        auto ref Buffer buffer)
 if (isSomeChar!C1 && isSomeChar!C2 && isOutputRange!(Buffer, C1))
 {
     translateImpl(str, transTable, toRemove, buffer);
@@ -5471,9 +5471,9 @@ if (isSomeChar!C1 && isSomeChar!C2 && isOutputRange!(Buffer, C1))
 // https://issues.dlang.org/show_bug.cgi?id=13018
 @safe pure unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     immutable dchar[dchar] transTable1 = ['e' : '5', 'o' : '7', '5': 'q'];
-    auto buffer = appender!(dchar[])();
+    auto buffer = fixedAppender!(dchar[])();
     translate("hello world", transTable1, null, buffer);
     assert(buffer.data == "h5ll7 w7rld");
 
@@ -5491,7 +5491,7 @@ if (isSomeChar!C1 && isSomeChar!C2 && isOutputRange!(Buffer, C1))
 void translate(C1, S, C2 = immutable char, Buffer)(C1[] str,
                                                    in S[dchar] transTable,
                                                    const(C2)[] toRemove,
-                                                   Buffer buffer)
+                                                   auto ref Buffer buffer)
 if (isSomeChar!C1 && isSomeString!S && isSomeChar!C2 && isOutputRange!(Buffer, S))
 {
     translateImpl(str, transTable, toRemove, buffer);
@@ -5500,7 +5500,7 @@ if (isSomeChar!C1 && isSomeString!S && isSomeChar!C2 && isOutputRange!(Buffer, S
 private void translateImpl(C1, T, C2, Buffer)(const(C1)[] str,
                                       scope T transTable,
                                       const(C2)[] toRemove,
-                                      Buffer buffer)
+                                      auto ref Buffer buffer)
 {
     bool[dchar] removeTable;
 
@@ -5876,7 +5876,7 @@ if (isSomeString!S)
 C1[] tr(C1, C2, C3, C4 = immutable char)
        (C1[] str, const(C2)[] from, const(C3)[] to, const(C4)[] modifiers = null)
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.conv : conv_to = to;
     import std.utf : decode;
 
@@ -5899,7 +5899,7 @@ C1[] tr(C1, C2, C3, C4 = immutable char)
     if (to.empty && !mod_d)
         to = conv_to!(typeof(to))(from);
 
-    auto result = appender!(C1[])();
+    auto result = fixedAppender!(C1[])();
     bool modified;
     dchar lastc;
 

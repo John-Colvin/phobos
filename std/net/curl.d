@@ -1047,8 +1047,8 @@ private auto _basicHTTP(T)(const(char)[] url, const(void)[] sendData, HTTP clien
     }
     client.url = url;
     HTTP.StatusLine statusLine;
-    import std.array : appender;
-    auto content = appender!(ubyte[])();
+    import std.array : fixedAppender;
+    auto content = fixedAppender!(ubyte[])();
     client.onReceive = (ubyte[] data)
     {
         content ~= data;

@@ -66,7 +66,7 @@ else:
 version (Windows):
 
 import core.sys.windows.winbase, core.sys.windows.winnt;
-import std.array : appender, Appender;
+import std.array : fixedAppender;
 import std.conv : to, toTextRange, text;
 import std.exception;
 import std.windows.charset;
@@ -77,7 +77,7 @@ string sysErrorString(
     int langId = LANG_NEUTRAL,
     int subLangId = SUBLANG_DEFAULT) @trusted
 {
-    auto buf = appender!string();
+    auto buf = fixedAppender!string();
 
     wenforce(
         // Ignore unlikely UTF decoding errors, always report the actual error (`errCode`)
@@ -134,7 +134,7 @@ class WindowsException : Exception
     {
         _code = code;
 
-        auto buf = appender!(char[]);
+        auto buf = fixedAppender!(char[]);
 
         if (str != null)
         {
@@ -246,7 +246,7 @@ T wenforce(T)(T condition, const(char)[] name, const(wchar)* namez, string file 
 /// error message. Returns `Error <code>` on failure
 package (std) string generateSysErrorMsg(DWORD errCode = GetLastError()) nothrow @trusted
 {
-    auto buf = appender!(char[]);
+    auto buf = fixedAppender!(char[]);
     cast(void) writeErrorMessage(errCode, buf);
     return cast(immutable) buf[];
 }

@@ -598,7 +598,7 @@ version (none) // TODO: revist once we have proper benchmark framework
 // https://issues.dlang.org/show_bug.cgi?id=14615
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.regex : replaceFirst, replaceFirstInto, regex;
     import std.stdio : writeln;
 
@@ -607,7 +607,7 @@ version (none) // TODO: revist once we have proper benchmark framework
     auto result = replaceFirst(example, pattern, "$1 Sponge Bob");
     assert(result == "Hello, world!");  // Ok.
 
-    auto sink = appender!string;
+    auto sink = fixedAppender!string;
     replaceFirstInto(sink, example, pattern, "$1 Sponge Bob");
     assert(sink.data == "Hello, world!");
     replaceAllInto(sink, example, pattern, "$1 Sponge Bob");

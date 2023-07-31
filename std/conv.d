@@ -144,11 +144,11 @@ private
         }
         else
         {
-            import std.array : appender;
+            import std.array : fixedAppender;
             import std.format.spec : FormatSpec;
             import std.format.write : formatValue;
 
-            auto w = appender!T();
+            auto w = fixedAppender!T();
             FormatSpec!(ElementEncodingType!T) f;
             formatValue(w, src, f);
             return w.data;
@@ -1013,10 +1013,10 @@ if (!(is(S : T) &&
     }
     else static if (isExactSomeString!S)
     {
-        import std.array : appender;
+        import std.array : fixedAppender;
         // other string-to-string
         //Use Appender directly instead of toStr, which also uses a formatedWrite
-        auto w = appender!T();
+        auto w = fixedAppender!T();
         w.put(value);
         return w.data;
     }
@@ -1079,13 +1079,13 @@ if (!(is(S : T) &&
             }
         }
 
-        import std.array : appender;
+        import std.array : fixedAppender;
         import std.format.spec : FormatSpec;
         import std.format.write : formatValue;
 
         //Default case, delegate to format
         //Note: we don't call toStr directly, to avoid duplicate work.
-        auto app = appender!T();
+        auto app = fixedAppender!T();
         app.put("cast(" ~ S.stringof ~ ")");
         FormatSpec!char f;
         formatValue(app, cast(OriginalType!S) value, f);
@@ -1142,11 +1142,11 @@ if (!(is(S : T) &&
     !isEnumStrToStr!(S, T) && !isNullToStr!(S, T)) &&
     !isInfinite!S && isExactSomeString!T && !isCopyable!S && !isStaticArray!S)
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format.spec : FormatSpec;
     import std.format.write : formatValue;
 
-    auto w = appender!T();
+    auto w = fixedAppender!T();
     FormatSpec!(ElementEncodingType!T) f;
     formatValue(w, value, f);
     return w.data;
@@ -1659,8 +1659,8 @@ if (!is(S : T) &&
     }
     else
     {
-        import std.array : appender;
-        auto w = appender!(E[])();
+        import std.array : fixedAppender;
+        auto w = fixedAppender!(E[])();
         w.reserve(value.length);
         foreach (ref e; value)
         {
@@ -4072,9 +4072,9 @@ auto parse(Target, Source, Flag!"doCount" doCount = No.doCount)(ref Source s, dc
 if (isSomeString!Source && !is(Source == enum) &&
     isDynamicArray!Target && !is(Target == enum))
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
 
-    auto result = appender!Target();
+    auto result = fixedAppender!Target();
 
     parseCheck!s(lbracket);
     size_t count = 1 + skipWS!(Source, Yes.doCount)(s);
@@ -4663,8 +4663,8 @@ auto parseElement(Target, Source, Flag!"doCount" doCount = No.doCount)(ref Sourc
 if (isInputRange!Source && isSomeChar!(ElementType!Source) && !is(Source == enum) &&
     isExactSomeString!Target)
 {
-    import std.array : appender;
-    auto result = appender!Target();
+    import std.array : fixedAppender;
+    auto result = fixedAppender!Target();
 
     // parse array of chars
     if (s.empty)
@@ -4826,10 +4826,10 @@ private S textImpl(S, U...)(U args)
     }
     else
     {
-        import std.array : appender;
+        import std.array : fixedAppender;
         import std.traits : isSomeChar, isSomeString;
 
-        auto app = appender!S();
+        auto app = fixedAppender!S();
 
         // assume that on average, parameters will have less
         // than 20 elements
@@ -5200,7 +5200,7 @@ public import core.lifetime : emplace;
 }
 
 // Undocumented for the time being
-void toTextRange(T, W)(T value, W writer)
+void toTextRange(T, W)(T value, auto ref W writer)
 if (isIntegral!T && isOutputRange!(W, char))
 {
     import core.internal.string : SignedStringBuf, signedToTempString,
@@ -5220,8 +5220,8 @@ if (isIntegral!T && isOutputRange!(W, char))
 
 @safe unittest
 {
-    import std.array : appender;
-    auto result = appender!(char[])();
+    import std.array : fixedAppender;
+    auto result = fixedAppender!(char[])();
     toTextRange(-1, result);
     assert(result.data == "-1");
 }

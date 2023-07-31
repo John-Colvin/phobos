@@ -721,7 +721,7 @@ void loadExclusions(string inp)
 
 string charsetString(CodepointSet set, string sep=";\n")
 {
-    auto app = appender!(char[])();
+    auto app = fixedAppender!(char[])();
     ubyte[] data = compressIntervals(set.byInterval);
     assert(CodepointSet(decompressIntervals(data)) == set);
     formattedWrite(app, "[%(0x%x, %)];", data);
@@ -730,7 +730,7 @@ string charsetString(CodepointSet set, string sep=";\n")
 
 string identName(string s)
 {
-    auto app = appender!(char[])();
+    auto app = fixedAppender!(char[])();
     foreach (c; s)
     {
         if (c == '-' || c == ' ')
@@ -743,7 +743,7 @@ string identName(string s)
 
 string uniformName(string s)
 {
-    auto app = appender!(char[])();
+    auto app = fixedAppender!(char[])();
     foreach (c; s)
     {
         if (c != '-' && c != ' ' && c != '_')
@@ -779,7 +779,7 @@ void writeAliasTable(File sink, string prefix, PropertyTable src)
     }
     string[] lines;
     string[] namesOnly;
-    auto app = appender!(char[])();
+    auto app = fixedAppender!(char[])();
     auto keys = src.table.keys;
     foreach (k; keys)
     {

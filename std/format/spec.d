@@ -575,10 +575,10 @@ if (is(Unqual!Char == Char))
 
     package string getCurFmtStr() const
     {
-        import std.array : appender;
+        import std.array : fixedAppender;
         import std.format.write : formatValue;
 
-        auto w = appender!string();
+        auto w = fixedAppender!string();
         auto f = FormatSpec!Char("%s"); // for stringnize
 
         put(w, '%');
@@ -615,9 +615,9 @@ if (is(Unqual!Char == Char))
      */
     string toString() const @safe pure
     {
-        import std.array : appender;
+        import std.array : fixedAppender;
 
-        auto app = appender!string();
+        auto app = fixedAppender!string();
         app.reserve(200 + trailing.length);
         toString(app);
         return app.data;
@@ -702,12 +702,12 @@ if (is(Unqual!Char == Char))
 
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.conv : text;
     import std.exception : assertThrown;
     import std.format : FormatException;
 
-    auto w = appender!(char[])();
+    auto w = fixedAppender!(char[])();
     auto f = FormatSpec!char("abc%sdef%sghi");
     f.writeUpToNextSpec(w);
     assert(w.data == "abc", w.data);
@@ -741,9 +741,9 @@ if (is(Unqual!Char == Char))
 // https://issues.dlang.org/show_bug.cgi?id=5237
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
 
-    auto w = appender!string();
+    auto w = fixedAppender!string();
     auto f = FormatSpec!char("%.16f");
     f.writeUpToNextSpec(w); // dummy eating
     assert(f.spec == 'f');
@@ -754,11 +754,11 @@ if (is(Unqual!Char == Char))
 // https://issues.dlang.org/show_bug.cgi?id=14059
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.exception : assertThrown;
     import std.format : FormatException;
 
-    auto a = appender!(string)();
+    auto a = fixedAppender!(string)();
 
     auto f = FormatSpec!char("%-(%s%"); // %)")
     assertThrown!FormatException(f.writeUpToNextSpec(a));
@@ -769,10 +769,10 @@ if (is(Unqual!Char == Char))
 
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format : format;
 
-    auto a = appender!(string)();
+    auto a = fixedAppender!(string)();
 
     auto f = FormatSpec!char("%,d");
     f.writeUpToNextSpec(a);
@@ -823,11 +823,11 @@ if (is(Unqual!Char == Char))
 // https://issues.dlang.org/show_bug.cgi?id=15348
 @safe pure unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.exception : collectExceptionMsg;
     import std.format : FormatException;
 
-    auto w = appender!(char[])();
+    auto w = fixedAppender!(char[])();
     auto f = FormatSpec!char("%*10d");
 
     assert(collectExceptionMsg!FormatException(f.writeUpToNextSpec(w))

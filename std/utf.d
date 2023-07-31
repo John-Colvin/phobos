@@ -3083,8 +3083,8 @@ private T toUTFImpl(T, S)(scope S s)
     }
     else
     {
-        import std.array : appender;
-        auto app = appender!T();
+        import std.array : fixedAppender;
+        auto app = fixedAppender!T();
 
         static if (is(S == C[], C) || hasLength!S)
             app.reserve(s.length);
@@ -3241,8 +3241,8 @@ private P toUTFzImpl(P, S)(S str) @safe pure
 if (!is(immutable typeof(*P.init) == immutable typeof(str[0])))
 //C1[], const(C1)[], or immutable(C1)[] -> C2*, const(C2)*, or immutable(C2)*
 {
-    import std.array : appender;
-    auto retval = appender!(typeof(*P.init)[])();
+    import std.array : fixedAppender;
+    auto retval = fixedAppender!(typeof(*P.init)[])();
 
     foreach (dchar c; str)
         retval.put(c);

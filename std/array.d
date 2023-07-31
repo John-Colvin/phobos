@@ -159,7 +159,7 @@ if (isIterable!Range && !isAutodecodableString!Range && !isInfinite!Range)
     }
     else
     {
-        auto a = appender!(E[])();
+        auto a = fixedAppender!(E[])();
         foreach (e; r)
         {
             a.put(e);
@@ -1400,7 +1400,7 @@ if (!isSomeString!(T[])
         // then the array that can be arbitrary big
         // TODO: needs a better implementation as there is no need to build an _array_
         // a singly-linked list of memory blocks (rope, etc.) will do
-        auto app = appender!(T[])();
+        auto app = fixedAppender!(T[])();
         foreach (i, E; U)
             app.put(stuff[i]);
         insertInPlace(array, pos, app.data);
@@ -1488,7 +1488,7 @@ if (isSomeString!(T[]) && allSatisfy!(isCharOrStringOrDcharRange, U))
     else
     {
         // immutable/const, just construct a new array
-        auto app = appender!(T[])();
+        auto app = fixedAppender!(T[])();
         app.put(array[0 .. pos]);
         foreach (i, E; U)
             app.put(stuff[i]);
@@ -1926,7 +1926,7 @@ if (isSomeString!S)
 {
     size_t istart;
     bool inword = false;
-    auto result = appender!(S[]);
+    auto result = fixedAppender!(S[]);
 
     foreach (i, dchar c ; s)
     {
@@ -2182,7 +2182,7 @@ if (isInputRange!RoR &&
     }
     else
     {
-        auto result = appender!RetType();
+        auto result = fixedAppender!RetType();
         put(result, ror.front);
         ror.popFront();
         for (; !ror.empty; ror.popFront())
@@ -2282,7 +2282,7 @@ if (isInputRange!RoR &&
     }
     else
     {
-        auto result = appender!RetType();
+        auto result = fixedAppender!RetType();
         put(result, ror.front);
         ror.popFront();
         for (; !ror.empty; ror.popFront())
@@ -2339,7 +2339,7 @@ if (isInputRange!RoR &&
     }
     else
     {
-        auto result = appender!RetType();
+        auto result = fixedAppender!RetType();
         for (; !ror.empty; ror.popFront())
             put(result, ror.front);
         return result.data;
@@ -2654,7 +2654,7 @@ if ((isForwardRange!R1 && isForwardRange!R2 && (hasLength!R2 || isSomeString!R2)
     if (balance.empty)
         return subject;
 
-    auto app = appender!(E[])();
+    auto app = fixedAppender!(E[])();
     app.put(subject[0 .. subject.length - balance.length]);
     app.put(rSave(to));
     ++changed;
@@ -2694,7 +2694,7 @@ if ((isForwardRange!R1 && isForwardRange!R2 && (hasLength!R2 || isSomeString!R2)
     See_Also:
         $(REF substitute, std,algorithm,iteration) for a lazy replace.
  +/
-void replaceInto(E, Sink, R1, R2)(Sink sink, E[] subject, R1 from, R2 to)
+void replaceInto(E, Sink, R1, R2)(auto ref Sink sink, E[] subject, R1 from, R2 to)
 if (isOutputRange!(Sink, E) &&
     ((isForwardRange!R1 && isForwardRange!R2 && (hasLength!R2 || isSomeString!R2)) ||
     is(Unqual!E : Unqual!R1)))
@@ -2719,7 +2719,7 @@ if (isOutputRange!(Sink, E) &&
 // empty array
 @safe unittest
 {
-    auto sink = appender!(int[])();
+    auto sink = fixedAppender!(int[])();
     int[] arr;
     replaceInto(sink, arr, 1, 2);
     assert(sink.data == []);
@@ -2781,11 +2781,11 @@ if (isOutputRange!(Sink, E) &&
 // https://issues.dlang.org/show_bug.cgi?id=10930
 @safe unittest
 {
-    auto sink = appender!(int[])();
+    auto sink = fixedAppender!(int[])();
     replaceInto(sink, [0, 1, 2], 1, 5);
     assert(sink.data == [0, 5, 2]);
 
-    auto sink2 = appender!(dchar[])();
+    auto sink2 = fixedAppender!(dchar[])();
     replaceInto(sink2, "äbö", 'ä', 'a');
     assert(sink2.data == "abö");
 }
@@ -2801,7 +2801,7 @@ if (isOutputRange!(Sink, E) &&
         to = the item to replace all instances of `from` with
         changed = the number of replacements
  +/
-void replaceInto(E, Sink, R1, R2)(Sink sink, E[] subject, R1 from, R2 to, ref size_t changed)
+void replaceInto(E, Sink, R1, R2)(auto ref Sink sink, E[] subject, R1 from, R2 to, ref size_t changed)
 if (isOutputRange!(Sink, E) &&
     ((isForwardRange!R1 && isForwardRange!R2 && (hasLength!R2 || isSomeString!R2)) ||
     is(Unqual!E : Unqual!R1)))
@@ -2900,7 +2900,7 @@ if (isInputRange!Range &&
     }
     else
     {
-        auto app = appender!(T[])();
+        auto app = fixedAppender!(T[])();
         app.put(subject[0 .. from]);
         app.put(stuff);
         app.put(subject[to .. $]);
@@ -3215,8 +3215,8 @@ if (is(typeof(replace(array, from, to, stuff))))
  +/
 E[] replaceFirst(E, R1, R2)(E[] subject, R1 from, R2 to)
 if (isDynamicArray!(E[]) &&
-    isForwardRange!R1 && is(typeof(appender!(E[])().put(from[0 .. 1]))) &&
-    isForwardRange!R2 && is(typeof(appender!(E[])().put(to[0 .. 1]))))
+    isForwardRange!R1 && is(typeof(fixedAppender!(E[])().put(from[0 .. 1]))) &&
+    isForwardRange!R2 && is(typeof(fixedAppender!(E[])().put(to[0 .. 1]))))
 {
     if (from.empty) return subject;
     static if (isSomeString!(E[]))
@@ -3232,7 +3232,7 @@ if (isDynamicArray!(E[]) &&
     if (idx == -1)
         return subject;
 
-    auto app = appender!(E[])();
+    auto app = fixedAppender!(E[])();
     app.put(subject[0 .. idx]);
     app.put(to);
 
@@ -3319,8 +3319,8 @@ if (isDynamicArray!(E[]) &&
  +/
 E[] replaceLast(E, R1, R2)(E[] subject, R1 from , R2 to)
 if (isDynamicArray!(E[]) &&
-    isForwardRange!R1 && is(typeof(appender!(E[])().put(from[0 .. 1]))) &&
-    isForwardRange!R2 && is(typeof(appender!(E[])().put(to[0 .. 1]))))
+    isForwardRange!R1 && is(typeof(fixedAppender!(E[])().put(from[0 .. 1]))) &&
+    isForwardRange!R2 && is(typeof(fixedAppender!(E[])().put(to[0 .. 1]))))
 {
     import std.range : retro;
     if (from.empty) return subject;
@@ -3346,7 +3346,7 @@ if (isDynamicArray!(E[]) &&
     else
         auto fromLength = from.length;
 
-    auto app = appender!(E[])();
+    auto app = fixedAppender!(E[])();
     static if (isSomeString!(E[]))
         app.put(subject[0 .. idx]);
     else
@@ -4828,6 +4828,7 @@ unittest
     assert(appS[] == "hellow");
     assert(appA[] == "hellow");
 }
+
 
 /++
 Constructs a static array from `a`.

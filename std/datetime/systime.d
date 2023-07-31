@@ -8198,8 +8198,8 @@ public:
       +/
     string toISOString() @safe const nothrow scope
     {
-        import std.array : appender;
-        auto app = appender!string();
+        import std.array : fixedAppender;
+        auto app = fixedAppender!string();
         app.reserve(30);
         try
             toISOString(app);
@@ -8366,8 +8366,8 @@ public:
     {
         assert(prec >= -1 && prec <= 7, "Precision must be in the range [-1, 7]");
 
-        import std.array : appender;
-        auto app = appender!string();
+        import std.array : fixedAppender;
+        auto app = fixedAppender!string();
         app.reserve(35);
         try
             toISOExtString(app, prec);
@@ -8541,8 +8541,8 @@ public:
       +/
     string toSimpleString() @safe const nothrow scope
     {
-        import std.array : appender;
-        auto app = appender!string();
+        import std.array : fixedAppender;
+        auto app = fixedAppender!string();
         app.reserve(35);
         try
             toSimpleString(app);
@@ -11077,8 +11077,8 @@ private:
   +/
 string fracSecsToISOString(int hnsecs, int prec = -1) @safe pure nothrow
 {
-    import std.array : appender;
-    auto w = appender!string();
+    import std.array : fixedAppender;
+    auto w = fixedAppender!string();
     try
         fracSecsToISOString(w, hnsecs, prec);
     catch (Exception e)

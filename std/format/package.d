@@ -773,9 +773,9 @@ See_Also:
 immutable(Char)[] format(Char, Args...)(in Char[] fmt, Args args)
 if (isSomeChar!Char)
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
 
-    auto w = appender!(immutable(Char)[]);
+    auto w = fixedAppender!(immutable(Char)[]);
     auto n = formattedWrite(w, fmt, args);
     version (all)
     {
@@ -1384,7 +1384,7 @@ if (isSomeChar!Char)
 typeof(fmt) format(alias fmt, Args...)(Args args)
 if (isSomeString!(typeof(fmt)))
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.range.primitives : ElementEncodingType;
     import std.traits : Unqual;
 
@@ -1392,7 +1392,7 @@ if (isSomeString!(typeof(fmt)))
     alias Char = Unqual!(ElementEncodingType!(typeof(fmt)));
 
     static assert(!e, e);
-    auto w = appender!(immutable(Char)[]);
+    auto w = fixedAppender!(immutable(Char)[]);
 
     // no need to traverse the string twice during compile time
     if (!__ctfe)
@@ -1440,10 +1440,10 @@ if (isSomeString!(typeof(fmt)))
 // result of format
 private size_t guessLength(Char, S)(S fmtString)
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
 
     size_t len;
-    auto output = appender!(immutable(Char)[])();
+    auto output = fixedAppender!(immutable(Char)[])();
     auto spec = FormatSpec!Char(fmtString);
     while (spec.writeUpToNextSpec(output))
     {
@@ -1719,11 +1719,11 @@ private void formatReflectTest(T)(ref T val, string fmt, string[] formatted, str
 {
     import core.exception : AssertError;
     import std.algorithm.searching : canFind;
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.math.operations : isClose;
     import std.traits : FloatingPointTypeOf;
 
-    auto w = appender!string();
+    auto w = fixedAppender!string();
     formattedWrite(w, fmt, val);
 
     auto input = w.data;

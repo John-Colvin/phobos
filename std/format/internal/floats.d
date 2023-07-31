@@ -21,8 +21,8 @@ private auto printFloat(T, Char)(const(T) val, FormatSpec!Char f)
 if (is(T == float) || is(T == double)
     || (is(T == real) && (T.mant_dig == double.mant_dig || T.mant_dig == 64)))
 {
-    import std.array : appender;
-    auto w = appender!string();
+    import std.array : fixedAppender;
+    auto w = fixedAppender!string();
 
     printFloat(w, val, f);
     return w.data;

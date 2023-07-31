@@ -3070,7 +3070,7 @@ if (isAlgebraic!VariantType && Handler.length > 0)
         Value value;
         @disable this();
     }
-    auto a = appender!(T[]);
+    auto a = fixedAppender!(T[]);
 }
 
 // https://issues.dlang.org/show_bug.cgi?id=13871

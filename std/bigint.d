@@ -1372,9 +1372,9 @@ public:
     @system unittest
     {
         import std.format.spec : FormatSpec;
-        import std.array : appender;
+        import std.array : fixedAppender;
         BigInt num = 503;
-        auto dst = appender!string();
+        auto dst = fixedAppender!string();
         num.toString(str => dst.put(str), null);
         assert(dst[] == "503");
         num = 504;
@@ -1543,8 +1543,8 @@ Returns:
 */
 string toHex(const(BigInt) x) pure @safe
 {
-    import std.array : appender;
-    auto outbuff = appender!string();
+    import std.array : fixedAppender;
+    auto outbuff = fixedAppender!string();
     x.toString(outbuff, "%X");
     return outbuff[];
 }
@@ -1776,8 +1776,8 @@ unittest
         ["%+- 04d", "+10 ", "-10 "],
     ];
 
-    auto w1 = appender!(char[])();
-    auto w2 = appender!(char[])();
+    auto w1 = fixedAppender!(char[])();
+    auto w2 = fixedAppender!(char[])();
 
     foreach (entry; table)
     {
@@ -1827,8 +1827,8 @@ unittest
         ["%+- 04x", "a   ", "-a  "],
     ];
 
-    auto w1 = appender!(char[])();
-    auto w2 = appender!(char[])();
+    auto w1 = fixedAppender!(char[])();
+    auto w2 = fixedAppender!(char[])();
 
     foreach (entry; table)
     {
@@ -1878,8 +1878,8 @@ unittest
         ["%+- 04X", "A   ", "-A  "],
     ];
 
-    auto w1 = appender!(char[])();
-    auto w2 = appender!(char[])();
+    auto w1 = fixedAppender!(char[])();
+    auto w2 = fixedAppender!(char[])();
 
     foreach (entry; table)
     {
@@ -1907,8 +1907,8 @@ unittest
     import std.array;
     import std.format.write : formattedWrite;
 
-    auto w1 = appender!string();
-    auto w2 = appender!string();
+    auto w1 = fixedAppender!string();
+    auto w2 = fixedAppender!string();
 
     int x = 100;
     formattedWrite(w1, "%010d", x);

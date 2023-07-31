@@ -938,13 +938,13 @@ enum bool isOutputRange(R, E) =
 @safe unittest
 {
     import std.array;
-    import std.stdio : writeln;
 
-    auto app = appender!string();
-    string s;
     static assert( isOutputRange!(Appender!string, string));
     static assert( isOutputRange!(Appender!string*, string));
     static assert(!isOutputRange!(Appender!string, int));
+    static assert( isOutputRange!(FixedAppender!string, string));
+    static assert( isOutputRange!(FixedAppender!string*, string));
+    static assert(!isOutputRange!(FixedAppender!string, int));
     static assert( isOutputRange!(wchar[], wchar));
     static assert( isOutputRange!(dchar[], char));
     static assert( isOutputRange!(dchar[], string));
@@ -954,7 +954,6 @@ enum bool isOutputRange(R, E) =
     static assert(!isOutputRange!(const(int)[], int));
     static assert(!isOutputRange!(inout(int)[], int));
 }
-
 
 /**
 Returns `true` if `R` is a forward range. A forward range is an

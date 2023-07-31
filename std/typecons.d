@@ -1289,8 +1289,8 @@ if (distinctFieldNames!(Specs))
          */
         string toString()() const
         {
-            import std.array : appender;
-            auto app = appender!string();
+            import std.array : fixedAppender;
+            auto app = fixedAppender!string();
             this.toString((const(char)[] chunk) => app ~= chunk);
             return app.data;
         }
@@ -3266,8 +3266,8 @@ struct Nullable(T)
      */
     string toString()
     {
-        import std.array : appender;
-        auto app = appender!string();
+        import std.array : fixedAppender;
+        auto app = fixedAppender!string();
         auto spec = singleSpec("%s");
         toString(app, spec);
         return app.data;
@@ -3276,8 +3276,8 @@ struct Nullable(T)
     /// ditto
     string toString() const
     {
-        import std.array : appender;
-        auto app = appender!string();
+        import std.array : fixedAppender;
+        auto app = fixedAppender!string();
         auto spec = singleSpec("%s");
         toString(app, spec);
         return app.data;
@@ -3329,10 +3329,10 @@ struct Nullable(T)
     // https://issues.dlang.org/show_bug.cgi?id=14940
     @safe unittest
     {
-        import std.array : appender;
+        import std.array : fixedAppender;
         import std.format.write : formattedWrite;
 
-        auto app = appender!string();
+        auto app = fixedAppender!string();
         Nullable!int a = 1;
         formattedWrite(app, "%s", a);
         assert(app.data == "1");
@@ -3871,7 +3871,7 @@ auto nullable(T)(T t)
     import std.conv : to;
     import std.array;
 
-    Appender!string buffer;
+    FixedAppender!string buffer;
 
     Nullable!int ni;
     assert(ni.to!string() == "Nullable.null");
@@ -3883,7 +3883,7 @@ auto nullable(T)(T t)
     NullableTest nt = Test("test");
     // test output range version
     assert(nt.to!string() == `Test("test")`);
-    // test appender version
+    // test FixedAppender version
     assert(nt.toString() == `Test("test")`);
     // test const version
     assert((cast(const) nt).toString() == `const(Test)("test")`);
@@ -8651,8 +8651,8 @@ struct Typedef(T, T init = T.init, string cookie=null)
      */
     string toString(this T)()
     {
-        import std.array : appender;
-        auto app = appender!string();
+        import std.array : fixedAppender;
+        auto app = fixedAppender!string();
         auto spec = singleSpec("%s");
         toString(app, spec);
         return app.data;

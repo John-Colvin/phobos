@@ -1401,8 +1401,8 @@ Complex!T sqrt(T)(Complex!T z)  @safe pure nothrow @nogc
     import std.format.write : formattedWrite;
     wstring wformat(T)(string format, Complex!T c)
     {
-        import std.array : appender;
-        auto w = appender!wstring();
+        import std.array : fixedAppender;
+        auto w = fixedAppender!wstring();
         auto n = formattedWrite(w, format, c);
         return w.data;
     }

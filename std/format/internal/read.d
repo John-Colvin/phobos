@@ -194,8 +194,8 @@ if (isInputRange!Range && is(StringTypeOf!T) && !isAggregateType!T && !is(T == e
     }
     else
     {
-        import std.array : appender;
-        auto app = appender!T();
+        import std.array : fixedAppender;
+        auto app = fixedAppender!T();
     }
     if (fmt.trailing.empty)
     {

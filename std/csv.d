@@ -1355,7 +1355,6 @@ public:
         return false;
     }
 
-
     /**
      * Part of an input range as defined by
      * $(REF isInputRange, std,range,primitives).
@@ -1653,7 +1652,7 @@ if (isSomeChar!Separator && isInputRange!Range
 
     string str = "\U00010143Hello,65,63.63\nWorld,123,3673.562";
 
-    auto a = appender!(dchar[])();
+    auto a = fixedAppender!(dchar[])();
     csvNextToken!string(str,a,',','"');
     assert(a.data == "\U00010143Hello");
     assert(str == ",65,63.63\nWorld,123,3673.562");
@@ -1696,7 +1695,7 @@ if (isSomeChar!Separator && isInputRange!Range
 
     string str = `one,two,"three ""quoted""","",` ~ "\"five\nnew line\"\nsix";
 
-    auto a = appender!(dchar[])();
+    auto a = fixedAppender!(dchar[])();
     csvNextToken!string(str,a,',','"');
     assert(a.data == "one");
     assert(str == `,two,"three ""quoted""","",` ~ "\"five\nnew line\"\nsix");
@@ -1738,7 +1737,7 @@ if (isSomeChar!Separator && isInputRange!Range
     import std.array;
 
     string str = "one,";
-    auto a = appender!(dchar[])();
+    auto a = fixedAppender!(dchar[])();
     csvNextToken(str,a,',','"');
     assert(a.data == "one");
     assert(str == ",");
@@ -1755,10 +1754,10 @@ if (isSomeChar!Separator && isInputRange!Range
 
     string str = "\"one\nnew line";
 
-    typeof(appender!(dchar[])()) a;
+    typeof(fixedAppender!(dchar[])()) a;
     try
     {
-        a = appender!(dchar[])();
+        a = fixedAppender!(dchar[])();
         csvNextToken(str,a,',','"');
         assert(0);
     }
@@ -1772,7 +1771,7 @@ if (isSomeChar!Separator && isInputRange!Range
 
     try
     {
-        a = appender!(dchar[])();
+        a = fixedAppender!(dchar[])();
         csvNextToken(str,a,',','"');
         assert(0);
     }
@@ -1784,7 +1783,7 @@ if (isSomeChar!Separator && isInputRange!Range
 
     str = "one, two \"quoted\" end";
 
-    a = appender!(dchar[])();
+    a = fixedAppender!(dchar[])();
     csvNextToken!(string,Malformed.ignore)(str,a,',','"');
     assert(a.data == "one");
     str.popFront();
@@ -1800,7 +1799,7 @@ if (isSomeChar!Separator && isInputRange!Range
 
     string str = `one|two|/three "quoted"/|//`;
 
-    auto a = appender!(dchar[])();
+    auto a = fixedAppender!(dchar[])();
     csvNextToken(str,a, '|','/');
     assert(a.data == "one"d);
     assert(str == `|two|/three "quoted"/|//`);

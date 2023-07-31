@@ -389,13 +389,13 @@ public alias StaticRegex = Regex;
 @trusted public auto regex(S : C[], C)(const S[] patterns, const(char)[] flags="")
 if (isSomeString!(S))
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.functional : memoize;
     enum cacheSize = 8; //TODO: invent nice interface to control regex caching
     const(C)[] pat;
     if (patterns.length > 1)
     {
-        auto app = appender!S();
+        auto app = fixedAppender!S();
         foreach (i, p; patterns)
         {
             if (i != 0)
@@ -966,11 +966,11 @@ if (isOutputRange!(Sink, dchar) && isSomeString!R)
 private R replaceFirstWith(alias output, R, RegEx)(R input, RegEx re)
 if (isSomeString!R && isRegexFor!(RegEx, R))
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     auto data = matchFirst(input, re);
     if (data.empty)
         return input;
-    auto app = appender!(R)();
+    auto app = fixedAppender!(R)();
     replaceCapturesInto!output(app, input, data);
     return app.data;
 }
@@ -981,11 +981,11 @@ private R replaceAllWith(alias output,
         alias method=matchAll, R, RegEx)(R input, RegEx re)
 if (isSomeString!R && isRegexFor!(RegEx, R))
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     auto matches = method(input, re); //inout(C)[] fails
     if (matches.empty)
         return input;
-    auto app = appender!(R)();
+    auto app = fixedAppender!(R)();
     replaceMatchesInto!output(app, input, matches);
     return app.data;
 }
@@ -1174,7 +1174,7 @@ if (isSomeString!R && isSomeString!String)
 
 // produces replacement string from format using captures for substitution
 package void replaceFmt(R, Capt, OutR)
-    (R format, Capt captures, OutR sink, bool ignoreBadSubs = false)
+    (R format, Capt captures, auto ref OutR sink, bool ignoreBadSubs = false)
 if (isOutputRange!(OutR, ElementEncodingType!R[]) &&
     isOutputRange!(OutR, ElementEncodingType!(Capt.String)[]))
 {
@@ -1265,7 +1265,7 @@ L_Replace_Loop:
 public R replaceFirst(R, C, RegEx)(R input, RegEx re, const(C)[] format)
 if (isSomeString!R && is(C : dchar) && isRegexFor!(RegEx, R))
 {
-    return replaceFirstWith!((m, sink) => replaceFmt(format, m, sink))(input, re);
+    return replaceFirstWith!((m, auto ref sink) => replaceFmt(format, m, sink))(input, re);
 }
 
 ///
@@ -1292,7 +1292,7 @@ if (isSomeString!R && is(C : dchar) && isRegexFor!(RegEx, R))
 public R replaceFirst(alias fun, R, RegEx)(R input, RegEx re)
 if (isSomeString!R && isRegexFor!(RegEx, R))
 {
-    return replaceFirstWith!((m, sink) => sink.put(fun(m)))(input, re);
+    return replaceFirstWith!((m, auto ref sink) => sink.put(fun(m)))(input, re);
 }
 
 ///
@@ -1319,13 +1319,13 @@ public @trusted void replaceFirstInto(Sink, R, C, RegEx)
 if (isOutputRange!(Sink, dchar) && isSomeString!R
     && is(C : dchar) && isRegexFor!(RegEx, R))
     {
-    replaceCapturesInto!((m, sink) => replaceFmt(format, m, sink))
+    replaceCapturesInto!((m, auto ref sink) => replaceFmt(format, m, sink))
         (sink, input, matchFirst(input, re));
     }
 
 ///ditto
 public @trusted void replaceFirstInto(alias fun, Sink, R, RegEx)
-    (Sink sink, R input, RegEx re)
+    (auto ref Sink sink, R input, RegEx re)
 if (isOutputRange!(Sink, dchar) && isSomeString!R && isRegexFor!(RegEx, R))
 {
     replaceCapturesInto!fun(sink, input, matchFirst(input, re));
@@ -1355,7 +1355,7 @@ if (isOutputRange!(Sink, dchar) && isSomeString!R && isRegexFor!(RegEx, R))
     import std.array;
     string m1 = "first message\n";
     string m2 = "second message\n";
-    auto result = appender!string();
+    auto result = fixedAppender!string();
     replaceFirstInto(result, m1, regex(`([a-z]+) message`), "$1");
     //equivalent of the above with user-defined callback
     replaceFirstInto!(cap=>cap[1])(result, m2, regex(`([a-z]+) message`));
@@ -1383,7 +1383,7 @@ if (isOutputRange!(Sink, dchar) && isSomeString!R && isRegexFor!(RegEx, R))
 public @trusted R replaceAll(R, C, RegEx)(R input, RegEx re, const(C)[] format)
 if (isSomeString!R && is(C : dchar) && isRegexFor!(RegEx, R))
 {
-    return replaceAllWith!((m, sink) => replaceFmt(format, m, sink))(input, re);
+    return replaceAllWith!((m, auto ref sink) => replaceFmt(format, m, sink))(input, re);
 }
 
 ///
@@ -1417,7 +1417,7 @@ if (isSomeString!R && is(C : dchar) && isRegexFor!(RegEx, R))
 public @trusted R replaceAll(alias fun, R, RegEx)(R input, RegEx re)
 if (isSomeString!R && isRegexFor!(RegEx, R))
 {
-    return replaceAllWith!((m, sink) => sink.put(fun(m)))(input, re);
+    return replaceAllWith!((m, auto ref sink) => sink.put(fun(m)))(input, re);
 }
 
 ///
@@ -1443,17 +1443,17 @@ if (isSomeString!R && isRegexFor!(RegEx, R))
     the other one with a user defined functor.
 +/
 public @trusted void replaceAllInto(Sink, R, C, RegEx)
-        (Sink sink, R input, RegEx re, const(C)[] format)
+        (auto ref Sink sink, R input, RegEx re, const(C)[] format)
 if (isOutputRange!(Sink, dchar) && isSomeString!R
     && is(C : dchar) && isRegexFor!(RegEx, R))
     {
-    replaceMatchesInto!((m, sink) => replaceFmt(format, m, sink))
+    replaceMatchesInto!((m, auto ref sink) => replaceFmt(format, m, sink))
         (sink, input, matchAll(input, re));
     }
 
 ///ditto
 public @trusted void replaceAllInto(alias fun, Sink, R, RegEx)
-        (Sink sink, R input, RegEx re)
+        (auto ref Sink sink, R input, RegEx re)
 if (isOutputRange!(Sink, dchar) && isSomeString!R && isRegexFor!(RegEx, R))
 {
     replaceMatchesInto!fun(sink, input, matchAll(input, re));
@@ -1479,7 +1479,7 @@ if (isOutputRange!(Sink, dchar) && isSomeString!R && isRegexFor!(RegEx, R))
 // exercise all of the replace APIs
 @system unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.conv;
     // try and check first/all simple substitution
     static foreach (S; AliasSeq!(string, wstring, dstring, char[], wchar[], dchar[]))
@@ -1505,7 +1505,7 @@ if (isOutputRange!(Sink, dchar) && isSomeString!R && isRegexFor!(RegEx, R))
         assert(rep1A == t1A);
         assert(replaceAll!(cap => "ho".to!S())(s2, re2) == t2A);
 
-        auto sink = appender!S();
+        auto sink = fixedAppender!S();
         replaceFirstInto(sink, s1, re1, "court");
         assert(sink.data == t1F);
         replaceFirstInto(sink, s2, re2, "ho");
@@ -1528,7 +1528,7 @@ if (isOutputRange!(Sink, dchar) && isSomeString!R && isRegexFor!(RegEx, R))
 public R replace(alias scheme = match, R, C, RegEx)(R input, RegEx re, const(C)[] format)
 if (isSomeString!R && isRegexFor!(RegEx, R))
 {
-    return replaceAllWith!((m, sink) => replaceFmt(format, m, sink), match)(input, re);
+    return replaceAllWith!((m, auto ref sink) => replaceFmt(format, m, sink), match)(input, re);
 }
 
 ///ditto
@@ -1695,8 +1695,8 @@ if (
 public @trusted String[] split(String, RegEx)(String input, RegEx rx)
 if (isSomeString!String  && isRegexFor!(RegEx, String))
 {
-    import std.array : appender;
-    auto a = appender!(String[])();
+    import std.array : fixedAppender;
+    auto a = fixedAppender!(String[])();
     foreach (e; splitter(input, rx))
         a.put(e);
     return a.data;

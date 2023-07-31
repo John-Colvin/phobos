@@ -411,10 +411,10 @@ package string urlEncode(scope string[string] values) @safe pure
     if (values.length == 0)
         return "";
 
-    import std.array : Appender;
+    import std.array : FixedAppender;
     import std.format.write : formattedWrite;
 
-    Appender!string enc;
+    FixedAppender!string enc;
     enc.reserve(values.length * 128);
 
     bool first = true;

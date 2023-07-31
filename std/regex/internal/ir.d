@@ -394,9 +394,9 @@ struct Group(DataIndex)
     {
         if (begin < end)
             return "(unmatched)";
-        import std.array : appender;
+        import std.array : fixedAppender;
         import std.format.write : formattedWrite;
-        auto a = appender!string();
+        auto a = fixedAppender!string();
         formattedWrite(a, "%s..%s", begin, end);
         return a.data;
     }
@@ -405,9 +405,9 @@ struct Group(DataIndex)
 //debugging tool, prints out instruction along with opcodes
 @trusted string disassemble(in Bytecode[] irb, uint pc, in NamedGroup[] dict=[])
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format.write : formattedWrite;
-    auto output = appender!string();
+    auto output = fixedAppender!string();
     formattedWrite(output,"%s", irb[pc].mnemonic);
     switch (irb[pc].code)
     {

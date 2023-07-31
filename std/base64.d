@@ -33,7 +33,7 @@
  * File f = File("./text.txt", "r");
  * scope(exit) f.close();
  *
- * Appender!string mime64 = appender!string;
+ * auto mime64 = fixedAppender!string;
  *
  * foreach (encoded; Base64.encoder(f.byChunk(57)))
  * {
@@ -1883,8 +1883,8 @@ class Base64Exception : Exception
     { // with OutputRange
         import std.array;
 
-        auto a = Appender!(char[])([]);
-        auto b = Appender!(ubyte[])([]);
+        auto a = FixedAppender!(char[])([]);
+        auto b = FixedAppender!(ubyte[])([]);
 
         assert(Base64.encode(tv[""], a) == 0);
         assert(Base64.decode(a.data, b) == 0);

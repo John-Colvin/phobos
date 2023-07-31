@@ -1451,9 +1451,9 @@ private LPVOID createEnv(const string[string] childEnv,
                          bool mergeWithParentEnv)
 {
     if (mergeWithParentEnv && childEnv.length == 0) return null;
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.uni : toUpper;
-    auto envz = appender!(wchar[])();
+    auto envz = fixedAppender!(wchar[])();
     void put(string var, string val)
     {
         envz.put(var);
@@ -3336,7 +3336,7 @@ private auto executeImpl(alias pipeFunc, Cmd, ExtraPipeFuncArgs...)(
     @trusted //TODO: @safe
 {
     import std.algorithm.comparison : min;
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.typecons : Tuple;
 
     auto redirect = (config.flags & Config.Flags.stderrPassThrough)
@@ -3346,7 +3346,7 @@ private auto executeImpl(alias pipeFunc, Cmd, ExtraPipeFuncArgs...)(
     auto p = pipeFunc(commandLine, redirect,
                       env, config, workDir, extraArgs);
 
-    auto a = appender!string;
+    auto a = fixedAppender!string;
     enum size_t defaultChunkSize = 4096;
     immutable chunkSize = min(maxOutput, defaultChunkSize);
 
@@ -3708,8 +3708,8 @@ private string escapeShellCommandString(return scope string command) @safe pure
 
 private string escapeWindowsShellCommand(scope const(char)[] command) @safe pure
 {
-    import std.array : appender;
-    auto result = appender!string();
+    import std.array : fixedAppender;
+    auto result = fixedAppender!string();
     result.reserve(command.length);
 
     foreach (c; command)

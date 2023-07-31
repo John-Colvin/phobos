@@ -346,7 +346,7 @@ debug(std_regex_test) import std.stdio;
         ];
     string produceExpected(M,String)(auto ref M m, String fmt)
     {
-        auto app = appender!(String)();
+        auto app = fixedAppender!(String)();
         replaceFmt(fmt, m.captures, app, true);
         return app.data;
     }
@@ -358,7 +358,7 @@ debug(std_regex_test) import std.stdio;
             alias String = immutable(Char)[];
             String produceExpected(M,Range)(auto ref M m, Range fmt)
             {
-                auto app = appender!(String)();
+                auto app = fixedAppender!(String)();
                 replaceFmt(fmt, m.captures, app, true);
                 return app.data;
             }

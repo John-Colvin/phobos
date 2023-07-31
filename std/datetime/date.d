@@ -2876,8 +2876,8 @@ public:
       +/
     string toISOString() const @safe pure nothrow
     {
-        import std.array : appender;
-        auto w = appender!string();
+        import std.array : fixedAppender;
+        auto w = fixedAppender!string();
         w.reserve(18);
         try
             toISOString(w);
@@ -2953,8 +2953,8 @@ public:
       +/
     string toISOExtString() const @safe pure nothrow
     {
-        import std.array : appender;
-        auto w = appender!string();
+        import std.array : fixedAppender;
+        auto w = fixedAppender!string();
         w.reserve(20);
         try
             toISOExtString(w);
@@ -3029,8 +3029,8 @@ public:
       +/
     string toSimpleString() const @safe pure nothrow
     {
-        import std.array : appender;
-        auto w = appender!string();
+        import std.array : fixedAppender;
+        auto w = fixedAppender!string();
         w.reserve(22);
         try
             toSimpleString(w);
@@ -7319,8 +7319,8 @@ public:
       +/
     string toISOString() const @safe pure nothrow
     {
-        import std.array : appender;
-        auto w = appender!string();
+        import std.array : fixedAppender;
+        auto w = fixedAppender!string();
         w.reserve(8);
         try
             toISOString(w);
@@ -7381,9 +7381,9 @@ public:
 
     @safe pure unittest
     {
-        import std.array : appender;
+        import std.array : fixedAppender;
 
-        auto w = appender!(char[])();
+        auto w = fixedAppender!(char[])();
         Date(2010, 7, 4).toISOString(w);
         assert(w.data == "20100704");
         w.clear();
@@ -7403,8 +7403,8 @@ public:
       +/
     string toISOExtString() const @safe pure nothrow
     {
-        import std.array : appender;
-        auto w = appender!string();
+        import std.array : fixedAppender;
+        auto w = fixedAppender!string();
         w.reserve(10);
         try
             toISOExtString(w);
@@ -7465,9 +7465,9 @@ public:
 
     @safe pure unittest
     {
-        import std.array : appender;
+        import std.array : fixedAppender;
 
-        auto w = appender!(char[])();
+        auto w = fixedAppender!(char[])();
         Date(2010, 7, 4).toISOExtString(w);
         assert(w.data == "2010-07-04");
         w.clear();
@@ -7487,8 +7487,8 @@ public:
       +/
     string toSimpleString() const @safe pure nothrow
     {
-        import std.array : appender;
-        auto w = appender!string();
+        import std.array : fixedAppender;
+        auto w = fixedAppender!string();
         w.reserve(11);
         try
             toSimpleString(w);
@@ -7549,9 +7549,9 @@ public:
 
     @safe pure unittest
     {
-        import std.array : appender;
+        import std.array : fixedAppender;
 
-        auto w = appender!(char[])();
+        auto w = fixedAppender!(char[])();
         Date(9, 12, 4).toSimpleString(w);
         assert(w.data == "0009-Dec-04");
         w.clear();
@@ -9050,8 +9050,8 @@ public:
       +/
     string toISOString() const @safe pure nothrow
     {
-        import std.array : appender;
-        auto w = appender!string();
+        import std.array : fixedAppender;
+        auto w = fixedAppender!string();
         w.reserve(6);
         try
             toISOString(w);
@@ -9097,8 +9097,8 @@ public:
       +/
     string toISOExtString() const @safe pure nothrow
     {
-        import std.array : appender;
-        auto w = appender!string();
+        import std.array : fixedAppender;
+        auto w = fixedAppender!string();
         w.reserve(8);
         try
             toISOExtString(w);

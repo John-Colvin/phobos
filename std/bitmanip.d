@@ -4326,7 +4326,7 @@ if (canSwapEndianness!T &&
         range = The range to _append to.
         value = The value to _append.
   +/
-void append(T, Endian endianness = Endian.bigEndian, R)(R range, const T value)
+void append(T, Endian endianness = Endian.bigEndian, R)(auto ref R range, const T value)
 if (canSwapEndianness!T && isOutputRange!(R, ubyte))
 {
     static if (endianness == Endian.bigEndian)
@@ -4502,7 +4502,7 @@ if (canSwapEndianness!T && isOutputRange!(R, ubyte))
     import std.meta : AliasSeq;
     static foreach (endianness; [Endian.bigEndian, Endian.littleEndian])
     {{
-        auto toWrite = appender!(ubyte[])();
+        auto toWrite = fixedAppender!(ubyte[])();
         alias Types = AliasSeq!(uint, int, long, ulong, short, ubyte, ushort, byte, uint);
         ulong[] values = [42, -11, long.max, 1098911981329L, 16, 255, 19012, 2, 17];
         assert(Types.length == values.length);

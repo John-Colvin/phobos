@@ -1548,8 +1548,8 @@ public:
       +/
     string toString() const @safe nothrow
     {
-        import std.array : appender;
-        auto app = appender!string();
+        import std.array : fixedAppender;
+        auto app = fixedAppender!string();
         try
             toString(app);
         catch (Exception e)

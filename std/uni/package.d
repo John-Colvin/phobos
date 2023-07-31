@@ -8713,7 +8713,7 @@ inout(C)[] normalize(NormalizationForm norm=NFC, C)(return scope inout(C)[] inpu
 {
     import std.algorithm.mutation : SwapStrategy;
     import std.algorithm.sorting : sort;
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.range : zip;
 
     auto anchors = splitNormalized!norm(input);
@@ -8723,7 +8723,7 @@ inout(C)[] normalize(NormalizationForm norm=NFC, C)(return scope inout(C)[] inpu
     decomposed.reserve(31);
     ubyte[] ccc;
     ccc.reserve(31);
-    auto app = appender!(C[])();
+    auto app = fixedAppender!(C[])();
     do
     {
         app.put(input[0 .. anchors[0]]);
@@ -9149,7 +9149,7 @@ private alias LowerTriple = AliasSeq!(toLowerIndex, MAX_SIMPLE_LOWER, toLowerTab
 private ElementEncodingType!S[] toCase(alias indexFn, uint maxIdx, alias tableFn, alias asciiConvert, S)(S s)
 if (isSomeString!S || (isRandomAccessRange!S && hasLength!S && hasSlicing!S && isSomeChar!(ElementType!S)))
 {
-    import std.array : appender, array;
+    import std.array : fixedAppender, array;
     import std.ascii : isASCII;
     import std.utf : byDchar, codeLength;
 
@@ -9162,7 +9162,7 @@ if (isSomeString!S || (isRandomAccessRange!S && hasLength!S && hasSlicing!S && i
         ushort idx = indexFn(cOuter);
         if (idx == ushort.max)
             continue;
-        auto result = appender!(C[])();
+        auto result = fixedAppender!(C[])();
         result.reserve(s.length);
         result.put(s[0 .. i]);
         foreach (dchar c; s[i .. $].byDchar)

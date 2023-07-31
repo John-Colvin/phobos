@@ -960,7 +960,7 @@ AddressInfo[] getAddressInfo(T...)(scope const(char)[] node, scope T options)
 
 private AddressInfo[] getAddressInfoImpl(scope const(char)[] node, scope const(char)[] service, addrinfo* hints) @system
 {
-        import std.array : appender;
+    import std.array : fixedAppender;
 
     if (getaddrinfoPointer && freeaddrinfoPointer)
     {
@@ -973,7 +973,7 @@ private AddressInfo[] getAddressInfoImpl(scope const(char)[] node, scope const(c
         enforce(ret == 0, new SocketOSException("getaddrinfo error", ret, &formatGaiError));
         scope(exit) freeaddrinfoPointer(ai_res);
 
-        auto result = appender!(AddressInfo[])();
+        auto result = fixedAppender!(AddressInfo[])();
 
         // Use const to force UnknownAddressReference to copy the sockaddr.
         for (const(addrinfo)* ai = ai_res; ai; ai = ai.ai_next)

@@ -1691,7 +1691,7 @@ Params:
     opt = The `Option` extracted from the `getopt` parameter.
     style = The manner in which to display the output of each `Option.`
 */
-void defaultGetoptFormatter(Output)(Output output, string text, Option[] opt, string style = "%*s %*s%*s%s\n")
+void defaultGetoptFormatter(Output)(auto ref Output output, string text, Option[] opt, string style = "%*s %*s%*s%s\n")
 {
     import std.algorithm.comparison : min, max;
     import std.format.write : formattedWrite;
@@ -1727,7 +1727,7 @@ void defaultGetoptFormatter(Output)(Output output, string text, Option[] opt, st
     auto args = ["prog", "--foo"];
     auto t = getopt(args, "foo|f", "Help", &a);
     string s;
-    auto app = appender!string();
+    auto app = fixedAppender!string();
     defaultGetoptFormatter(app, "Some Text", t.options);
 
     string helpMsg = app.data;
@@ -1755,7 +1755,7 @@ void defaultGetoptFormatter(Output)(Output output, string text, Option[] opt, st
     auto args = ["prog", "--foo"];
     auto t = getopt(args, config.required, "foo|f", "Help", &a);
     string s;
-    auto app = appender!string();
+    auto app = fixedAppender!string();
     defaultGetoptFormatter(app, "Some Text", t.options);
 
     string helpMsg = app.data;
@@ -1939,7 +1939,7 @@ void defaultGetoptFormatter(Output)(Output output, string text, Option[] opt, st
     auto args = ["prog", "--foo"];
     auto t = getopt(args, "foo|f", "Help", &a);
     string s;
-    auto app = appender!string();
+    auto app = fixedAppender!string();
     defaultGetoptFormatter(app, "Some Text", t.options, "\t\t%*s %*s%*s\n%s\n");
 
     string helpMsg = app.data;

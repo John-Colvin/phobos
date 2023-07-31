@@ -696,9 +696,9 @@ if (isSomeString!(typeof(fmt)))
 
 @safe pure unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
 
-    auto stream = appender!string();
+    auto stream = fixedAppender!string();
     formattedWrite(stream, "%s", 1.1);
     assert(stream.data == "1.1", stream.data);
 }
@@ -707,7 +707,7 @@ if (isSomeString!(typeof(fmt)))
 {
     import std.array;
 
-    auto w = appender!string();
+    auto w = fixedAppender!string();
     formattedWrite(w, "%s %d", "@safe/pure", 42);
     assert(w.data == "@safe/pure 42");
 }
@@ -723,14 +723,14 @@ if (isSomeString!(typeof(fmt)))
 @safe pure unittest
 {
     import std.algorithm.iteration : map;
-    import std.array : appender;
+    import std.array : fixedAppender;
 
-    auto stream = appender!string();
+    auto stream = fixedAppender!string();
     formattedWrite(stream, "%s", map!"a*a"([2, 3, 5]));
     assert(stream.data == "[4, 9, 25]", stream.data);
 
     // Test shared data.
-    stream = appender!string();
+    stream = fixedAppender!string();
     shared int s = 6;
     formattedWrite(stream, "%s", s);
     assert(stream.data == "6");
@@ -739,11 +739,11 @@ if (isSomeString!(typeof(fmt)))
 @safe pure unittest
 {
     // testing positional parameters
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.exception : collectExceptionMsg;
     import std.format : FormatException;
 
-    auto w = appender!(char[])();
+    auto w = fixedAppender!(char[])();
     formattedWrite(w,
             "Numbers %2$s and %1$s are reversed and %1$s%2$s repeated",
             42, 0);
@@ -763,9 +763,9 @@ if (isSomeString!(typeof(fmt)))
 // https://issues.dlang.org/show_bug.cgi?id=3479
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
 
-    auto stream = appender!(char[])();
+    auto stream = fixedAppender!(char[])();
     formattedWrite(stream, "%2$.*1$d", 12, 10);
     assert(stream.data == "000000000010", stream.data);
 }
@@ -773,19 +773,19 @@ if (isSomeString!(typeof(fmt)))
 // https://issues.dlang.org/show_bug.cgi?id=6893
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
 
     enum E : ulong { A, B, C }
-    auto stream = appender!(char[])();
+    auto stream = fixedAppender!(char[])();
     formattedWrite(stream, "%s", E.C);
     assert(stream.data == "C");
 }
 
 @safe pure unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
 
-    auto stream = appender!string();
+    auto stream = fixedAppender!string();
     formattedWrite(stream, "%u", 42);
     assert(stream.data == "42", stream.data);
 }
@@ -793,9 +793,9 @@ if (isSomeString!(typeof(fmt)))
 @safe pure unittest
 {
     // testing raw writes
-    import std.array : appender;
+    import std.array : fixedAppender;
 
-    auto w = appender!(char[])();
+    auto w = fixedAppender!(char[])();
     uint a = 0x02030405;
     formattedWrite(w, "%+r", a);
     assert(w.data.length == 4 && w.data[0] == 2 && w.data[1] == 3
@@ -809,10 +809,10 @@ if (isSomeString!(typeof(fmt)))
 
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.conv : text, octal;
 
-    auto stream = appender!(char[])();
+    auto stream = fixedAppender!(char[])();
 
     formattedWrite(stream, "hello world! %s %s ", true, 57, 1_000_000_000, 'x', " foo");
     assert(stream.data == "hello world! true 57 ", stream.data);
@@ -1176,14 +1176,14 @@ if (isSomeString!(typeof(fmt)))
 
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.meta : AliasSeq;
 
     immutable(char[5])[int] aa = ([3:"hello", 4:"betty"]);
     assert(aa[3] == "hello");
     assert(aa[4] == "betty");
 
-    auto stream = appender!(char[])();
+    auto stream = fixedAppender!(char[])();
     alias AllNumerics =
         AliasSeq!(byte, ubyte, short, ushort, int, uint, long, ulong,
                   float, double, real);
@@ -1262,13 +1262,13 @@ void formatValue(Writer, T, Char)(auto ref Writer w, auto ref T val, scope const
 // https://issues.dlang.org/show_bug.cgi?id=15386
 @safe pure unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format.spec : FormatSpec;
     import std.format : FormatException;
     import std.exception : assertThrown;
 
-    auto w = appender!(char[])();
-    auto dor = appender!(char[])();
+    auto w = fixedAppender!(char[])();
+    auto dor = fixedAppender!(char[])();
     auto fs = FormatSpec!char("%.*s");
     fs.writeUpToNextSpec(dor);
     assertThrown!FormatException(formatValue(w, 0, fs));
@@ -1301,10 +1301,10 @@ void formatValue(Writer, T, Char)(auto ref Writer w, auto ref T val, scope const
         auto opEquals(State other) const { return state == other; }
     }
 
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format.spec : singleSpec;
 
-    auto writer = appender!string();
+    auto writer = fixedAppender!string();
     const spec = singleSpec("%s");
     S a;
     writer.formatValue(a, spec);

@@ -1236,11 +1236,11 @@ if (is(StaticArrayTypeOf!T) && !is(T == enum) && !hasToString!(T, Char))
 // Test for https://issues.dlang.org/show_bug.cgi?id=8310
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format : formatValue;
 
     FormatSpec!char f;
-    auto w = appender!string();
+    auto w = fixedAppender!string();
 
     char[2] two = ['a', 'b'];
     formatValue(w, two, f);
@@ -2304,7 +2304,6 @@ if (is(T == class) && !is(T == enum))
 
 @system unittest
 {
-    import std.array : appender;
     import std.range.interfaces : inputRangeObject;
 
     // class range (https://issues.dlang.org/show_bug.cgi?id=5154)
@@ -2669,7 +2668,7 @@ if ((is(T == struct) || is(T == union)) && (hasToString!(T, Char) || !is(Builtin
 
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format : formatValue;
 
     // https://issues.dlang.org/show_bug.cgi?id=7230
@@ -2688,28 +2687,28 @@ if ((is(T == struct) || is(T == union)) && (hasToString!(T, Char) || !is(Builtin
     bug.b = 123;
 
     FormatSpec!char f;
-    auto w = appender!(char[])();
+    auto w = fixedAppender!(char[])();
     formatValue(w, bug, f);
     assert(w.data == `Bug7230("hello", #{overlap a, b, c}, 10)`);
 }
 
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format : formatValue;
 
     static struct S{ @disable this(this); }
     S s;
 
     FormatSpec!char f;
-    auto w = appender!string();
+    auto w = fixedAppender!string();
     formatValue(w, s, f);
     assert(w.data == "S()");
 }
 
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format : formatValue;
 
     //struct Foo { @disable string toString(); }
@@ -2718,7 +2717,7 @@ if ((is(T == struct) || is(T == union)) && (hasToString!(T, Char) || !is(Builtin
     interface Bar { @disable string toString(); }
     Bar bar;
 
-    auto w = appender!(char[])();
+    auto w = fixedAppender!(char[])();
     FormatSpec!char f;
 
     // NOTE: structs cant be tested : the assertion is correct so compilation
@@ -2770,7 +2769,7 @@ if ((is(T == struct) || is(T == union)) && (hasToString!(T, Char) || !is(Builtin
 
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format : singleSpec;
 
     // Bug #17269. Behavior similar to `struct A { Nullable!string B; }`
@@ -2786,7 +2785,7 @@ if ((is(T == struct) || is(T == union)) && (hasToString!(T, Char) || !is(Builtin
         StringAliasThis testVar;
     }
 
-    auto w = appender!string();
+    auto w = fixedAppender!string();
     auto spec = singleSpec("%s");
     formatElement(w, TestContainer(), spec);
 
@@ -2854,7 +2853,7 @@ void enforceValidFormatSpec(T, Char)(scope const ref FormatSpec!Char f)
 void formatValueImpl(Writer, T, Char)(auto ref Writer w, T val, scope const ref FormatSpec!Char f)
 if (is(T == enum))
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.range.primitives : put;
 
     if (f.spec != 's')
@@ -2864,7 +2863,7 @@ if (is(T == enum))
         if (val == __traits(getMember, T, member))
             return formatValueImpl(w, member, f);
 
-    auto w2 = appender!string();
+    auto w2 = fixedAppender!string();
 
     // val is not a member of T, output cast(T) rawValue instead.
     enum prefix = "cast(" ~ T.stringof ~ ")";
@@ -3077,14 +3076,14 @@ if (isDelegate!T)
 
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format : formatValue;
 
     void func() @system { __gshared int x; ++x; throw new Exception("msg"); }
     version (linux)
     {
         FormatSpec!char f;
-        auto w = appender!string();
+        auto w = fixedAppender!string();
         formatValue(w, &func, f);
         assert(w.data.length >= 15 && w.data[0 .. 15] == "void delegate()");
     }
@@ -3094,7 +3093,7 @@ if (isDelegate!T)
 void formatElement(Writer, T, Char)(auto ref Writer w, T val, scope const ref FormatSpec!Char f)
 if (is(StringTypeOf!T) && !hasToString!(T, Char) && !is(T == enum))
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format.write : formattedWrite, formatValue;
     import std.range.primitives : put;
     import std.utf : decode, UTFException;
@@ -3152,10 +3151,10 @@ if (is(StringTypeOf!T) && !hasToString!(T, Char) && !is(T == enum))
 
 @safe pure unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format.spec : singleSpec;
 
-    auto w = appender!string();
+    auto w = fixedAppender!string();
     auto spec = singleSpec("%s");
     formatElement(w, "Hello World", spec);
 
@@ -3164,10 +3163,10 @@ if (is(StringTypeOf!T) && !hasToString!(T, Char) && !is(T == enum))
 
 @safe unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format.spec : singleSpec;
 
-    auto w = appender!string();
+    auto w = fixedAppender!string();
     auto spec = singleSpec("%s");
     formatElement(w, "H", spec);
 
@@ -3177,17 +3176,17 @@ if (is(StringTypeOf!T) && !hasToString!(T, Char) && !is(T == enum))
 // https://issues.dlang.org/show_bug.cgi?id=15888
 @safe pure unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format.spec : singleSpec;
 
     ushort[] a = [0xFF_FE, 0x42];
-    auto w = appender!string();
+    auto w = fixedAppender!string();
     auto spec = singleSpec("%s");
     formatElement(w, cast(wchar[]) a, spec);
     assert(w.data == `[cast(wchar) 0xFFFE, cast(wchar) 0x42]`);
 
     uint[] b = [0x0F_FF_FF_FF, 0x42];
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%s");
     formatElement(w, cast(dchar[]) b, spec);
     assert(w.data == `[cast(dchar) 0xFFFFFFF, cast(dchar) 0x42]`);
@@ -3269,10 +3268,10 @@ if (isSomeString!T)
 
 @safe pure unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format : singleSpec;
 
-    auto w = appender!string();
+    auto w = fixedAppender!string();
     auto spec = singleSpec("%s");
     writeAligned(w, "a本Ä", spec);
     assert(w.data == "a本Ä", w.data);
@@ -3280,10 +3279,10 @@ if (isSomeString!T)
 
 @safe pure unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format : singleSpec;
 
-    auto w = appender!string();
+    auto w = fixedAppender!string();
     auto spec = singleSpec("%10s");
     writeAligned(w, "a本Ä", spec);
     assert(w.data == "       a本Ä", "|" ~ w.data ~ "|");
@@ -3291,10 +3290,10 @@ if (isSomeString!T)
 
 @safe pure unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format : singleSpec;
 
-    auto w = appender!string();
+    auto w = fixedAppender!string();
     auto spec = singleSpec("%-10s");
     writeAligned(w, "a本Ä", spec);
     assert(w.data == "a本Ä       ", w.data);
@@ -3494,92 +3493,92 @@ if (isSomeString!T1 && isSomeString!T2 && isSomeString!T3 && isSomeString!T4)
 
 @safe pure unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format : singleSpec;
 
-    auto w = appender!string();
+    auto w = fixedAppender!string();
     auto spec = singleSpec("%s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "pregroupingsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%20s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "      pregroupingsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%-20s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "pregroupingsuf      ", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%020s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "pre000000groupingsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%-020s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "pregroupingsuf      ", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%20,1s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "preg,r,o,u,p,i,n,gsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%20,2s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "   pregr,ou,pi,ngsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%20,3s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "    pregr,oup,ingsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%20,10s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "      pregroupingsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%020,1s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "preg,r,o,u,p,i,n,gsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%020,2s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "pre00,gr,ou,pi,ngsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%020,3s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "pre00,0gr,oup,ingsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%020,10s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "pre000,00groupingsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%021,3s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "pre000,0gr,oup,ingsuf", w.data);
 
     // According to https://github.com/dlang/phobos/pull/7112 this
     // is defined by POSIX standard:
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%022,3s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "pre0,000,0gr,oup,ingsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%023,3s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "pre0,000,0gr,oup,ingsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%,3s");
     writeAligned(w, "pre", "grouping", "suf", spec);
     assert(w.data == "pregr,oup,ingsuf", w.data);
@@ -3587,31 +3586,31 @@ if (isSomeString!T1 && isSomeString!T2 && isSomeString!T3 && isSomeString!T4)
 
 @safe pure unittest
 {
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.format : singleSpec;
 
-    auto w = appender!string();
+    auto w = fixedAppender!string();
     auto spec = singleSpec("%.10s");
     writeAligned(w, "pre", "grouping", "suf", spec, true);
     assert(w.data == "pre00groupingsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%.10,3s");
     writeAligned(w, "pre", "grouping", "suf", spec, true);
     assert(w.data == "pre0,0gr,oup,ingsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%25.10,3s");
     writeAligned(w, "pre", "grouping", "suf", spec, true);
     assert(w.data == "      pre0,0gr,oup,ingsuf", w.data);
 
     // precision has precedence over zero flag
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%025.12,3s");
     writeAligned(w, "pre", "grouping", "suf", spec, true);
     assert(w.data == "    pre000,0gr,oup,ingsuf", w.data);
 
-    w = appender!string();
+    w = fixedAppender!string();
     spec = singleSpec("%025.13,3s");
     writeAligned(w, "pre", "grouping", "suf", spec, true);
     assert(w.data == "  pre0,000,0gr,oup,ingsuf", w.data);
@@ -3938,13 +3937,13 @@ private void formatTest(T)(T val, string[] expected, size_t ln = __LINE__, strin
 {
     import core.exception : AssertError;
     import std.algorithm.searching : canFind;
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.conv : text;
     import std.exception : enforce;
     import std.format.write : formatValue;
 
     FormatSpec!char f;
-    auto w = appender!string();
+    auto w = fixedAppender!string();
     formatValue(w, val, f);
     enforce!AssertError(expected.canFind(w.data),
         text("expected one of `", expected, "`, result = `", w.data, "`"), fn, ln);
@@ -3955,12 +3954,12 @@ private void formatTest(T)(string fmt, T val, string[] expected, size_t ln = __L
 {
     import core.exception : AssertError;
     import std.algorithm.searching : canFind;
-    import std.array : appender;
+    import std.array : fixedAppender;
     import std.conv : text;
     import std.exception : enforce;
     import std.format.write : formattedWrite;
 
-    auto w = appender!string();
+    auto w = fixedAppender!string();
     formattedWrite(w, fmt, val);
     enforce!AssertError(expected.canFind(w.data),
         text("expected one of `", expected, "`, result = `", w.data, "`"), fn, ln);

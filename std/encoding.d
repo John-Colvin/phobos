@@ -2233,7 +2233,7 @@ if (isNativeOutputRange!(R, E))
 @safe pure unittest
 {
     import std.array;
-    Appender!(char[]) r;
+    FixedAppender!(char[]) r;
     assert(encode!(char)('T', r) == 1);
     assert(encode!(wchar)('T', r) == 1);
     assert(encode!(dchar)('T', r) == 1);

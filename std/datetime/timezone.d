@@ -1408,8 +1408,8 @@ package:
       +/
     static string toISOString(Duration utcOffset) @safe pure
     {
-        import std.array : appender;
-        auto w = appender!string();
+        import std.array : fixedAppender;
+        auto w = fixedAppender!string();
         w.reserve(5);
         toISOString(w, utcOffset);
         return w.data;
@@ -1479,8 +1479,8 @@ package:
       +/
     static string toISOExtString(Duration utcOffset) @safe pure
     {
-        import std.array : appender;
-        auto w = appender!string();
+        import std.array : fixedAppender;
+        auto w = fixedAppender!string();
         w.reserve(6);
         toISOExtString(w, utcOffset);
         return w.data;
@@ -2421,7 +2421,7 @@ public:
     static string[] getInstalledTZNames(string subName = "", string tzDatabaseDir = defaultTZDatabaseDir) @safe
     {
         import std.algorithm.sorting : sort;
-        import std.array : appender;
+        import std.array : fixedAppender;
         import std.exception : enforce;
         import std.format : format;
 
@@ -2438,7 +2438,7 @@ public:
         enforce(tzDatabaseDir.exists(), new DateTimeException(format("Directory %s does not exist.", tzDatabaseDir)));
         enforce(tzDatabaseDir.isDir, new DateTimeException(format("%s is not a directory.", tzDatabaseDir)));
 
-        auto timezones = appender!(string[])();
+        auto timezones = fixedAppender!(string[])();
 
         version (Android)
         {
@@ -2962,7 +2962,7 @@ else version (Windows)
     final class WindowsTimeZone : TimeZone
     {
         import std.algorithm.sorting : sort;
-        import std.array : appender;
+        import std.array : fixedAppender;
         import std.conv : to;
         import std.format : format;
 
@@ -3040,7 +3040,7 @@ else version (Windows)
 
         static string[] getInstalledTZNames() @trusted
         {
-            auto timezones = appender!(string[])();
+            auto timezones = fixedAppender!(string[])();
 
             scope baseKey = Registry.localMachine.getKey(`Software\Microsoft\Windows NT\CurrentVersion\Time Zones`);
 
